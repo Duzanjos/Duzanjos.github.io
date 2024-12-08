@@ -1,181 +1,80 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Duzanjos - Desenvolvedor e UX/UI Designer</title>
-        <meta
-            name="description"
-            content="Desenvolvedor Front End e UX/UI Designer Localizado no Rio de Janeiro"
-        />
-        <link rel="stylesheet" href="./css/style.min.css" />
-        <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Copiar Conteúdo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        .button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Copiar Conteúdo</h1>
+    <div class="container" id="list">
+        <!-- Os itens serão gerados dinamicamente aqui -->
+    </div>
 
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;700&display=swap"
-            rel="stylesheet"
-        />
-    </head>
+    <script>
+        const numbers = [
+            "3200408535464271", "3244672665878956", "4311603960718305", "2277853947370113",
+            "8858520361299918", "9270745593244448", "6351536139124386", "0465486381156978",
+            "0618461973733176", "6038862842114383", "3791539966296974", "0543927223954132",
+            "3664664168331868", "4705672750019638", "0398268892963719", "2908153664100849",
+            "7833910685352610", "4964404342099337", "6714135179154597", "2304735526577198",
+            "3222437827647524", "5996182109108681", "8324952541971235", "2842095716257205",
+            "7111190291007529", "0876571423843700", "7987777248162759", "3297086625509135",
+            "5349280244696399", "7572689902028285", "8574236781068323", "0282809962276307",
+            "8762428970869190", "3543149087579280"
+        ];
 
-    <body>
-        <header class="header">
-            <img src="./img/marca.svg" alt="Lobo" width="104" height="38" />
-            <nav>
-                <ul class="header-menu">
-                    <li><a href="#experiencia">Experiência</a></li>
-                    <li><a href="#formacao">Formação</a></li>
-                    <li><a href="#contato">Contato</a></li>
-                </ul>
-            </nav>
-        </header>
+        const list = document.getElementById('list');
 
-        <main class="introducao">
-            <img
-                src="./img/perfil.jpg"
-                alt="Duzanjos Perfil"
-                width="360"
-                height="520"
-            />
-            <div>
-                <h1>Desenvolvedor<br />Front End &<br />UX/UI Designer</h1>
-                <p>Localizado em Maringá-PR</p>
-            </div>
-        </main>
+        numbers.forEach(number => {
+            const item = document.createElement('div');
+            item.className = 'item';
+            item.innerHTML = `
+                <span>${number}</span>
+                <button class="button" onclick="copyToClipboard('${number}')">Copiar</button>
+            `;
+            list.appendChild(item);
+        });
 
-        <section class="experiencia" id="experiencia" aria-label="Experiência">
-            <h2 class="subtitulo">Experiência</h2>
-            <div>
-                <p class="experiencia-texto">
-                    Esse é o meu primeiro site, ainda estou no início do meu
-                    desenvolvimento como Dev. Estou estudando
-                    <strong>HTML</strong>, <strong>CSS</strong> e
-                    <strong>JavaScript</strong> nesse curso do
-                    <a href="https://www.origamid.com/">Origamid</a> para
-                    desenvolver sites e aplicativos web.
-                </p>
-
-                <div class="empresa">
-                    <span class="empresa-ano">2024</span>
-                    <h3 class="empresa-titulo">Sem conteúdo por enquanto.</h3>
-                    <span class="empresa-titulo">Desenvolvedor</span>
-                    <p class="empresa-texto">
-                        Ainda sem informação no currículo para preencher aqui.
-                    </p>
-                    <ul class="empresa-habilidades">
-                        <li>HTML</li>
-                        <li>CSS</li>
-                        <li>JavaScript</li>
-                        <li>UX Design</li>
-                        <li>UI Design</li>
-                    </ul>
-                </div>
-
-                <div class="empresa">
-                    <span class="empresa-ano">2024</span>
-                    <h3 class="empresa-titulo">Sem conteúdo por enquanto.</h3>
-                    <span class="empresa-titulo">Desenvolvedor</span>
-                    <p class="empresa-texto">
-                        Ainda sem informação no currículo para preencher aqui.
-                    </p>
-                    <ul class="empresa-habilidades">
-                        <li>Java</li>
-                        <li>Git</li>
-                        <li>GitHub</li>
-                    </ul>
-                </div>
-
-                <div class="empresa">
-                    <span class="empresa-ano">2024</span>
-                    <h3 class="empresa-titulo">Sem conteúdo por enquanto.</h3>
-                    <span class="empresa-titulo">Desenvolvedor</span>
-                    <p class="empresa-texto">
-                        Ainda sem informação no currículo para preencher aqui.
-                    </p>
-                    <ul class="empresa-habilidades">
-                        <li>HTML</li>
-                        <li>CSS</li>
-                        <li>JavaScript</li>
-                        <li>UX Design</li>
-                        <li>UI Design</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-
-        <section class="formacao" id="formacao" aria-label="Formação">
-            <div class="formacao-container">
-                <h2 class="subtitulo">Formação</h2>
-
-                <div>
-                    <p class="formacao-texto">
-                        Formado em Engenharia de Software e além disso me
-                        mantenho sempre atualizado com cursos intensivos online.
-                    </p>
-
-                    <ul class="faculdade-lista">
-                        <li class="faculdade">
-                            <span class="faculdade-tipo">Bacharel</span>
-                            <h3 class="faculdade-curso">
-                                Engenharia de Software
-                            </h3>
-                            <span class="faculdade-instituicao"
-                                >Unicesumar</span
-                            >
-                        </li>
-                        <li class="faculdade">
-                            <span class="faculdade-tipo">Sem informação</span>
-                            <h3 class="faculdade-curso">Sem informação</h3>
-                            <span class="faculdade-instituicao"
-                                >Sem informação</span
-                            >
-                        </li>
-                        <li class="faculdade">
-                            <span class="faculdade-tipo">Sem informação</span>
-                            <h3 class="faculdade-curso">Sem informação</h3>
-                            <span class="faculdade-instituicao"
-                                >Sem informação</span
-                            >
-                        </li>
-                    </ul>
-
-                    <div class="formacao-extra">
-                        <div class="cursos">
-                            <h3>Cursos Intensivos</h3>
-                            <ul>
-                                <li>UX Design & UI Design <span>17h</span></li>
-                                <li>
-                                    HTML e CSS para Iniciantes (andamento) <span>23h</span>
-                                </li>
-                                <li>
-                                  BootCamp Santander 2024 - Backend com Java (andamento)<span>75h</span>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="idiomas">
-                            <h3>Idiomas</h3>
-                            <ul>
-                                <li>Português <span>/ Fluente</span></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <footer class="footer" id="contato">
-            <div class="footer-container">
-                <p class="footer-texto">
-                    Estou disponível para novos projetos no momento. Entre em
-                    contato comigo e marcamos uma conversa 👋
-                </p>
-                <ul class="footer-contato">
-                    <li>adrianodz.net@hotmail.com</li>
-                    <li><a href="/">@AdrianoDuzanjos</a></li>
-                </ul>
-                <p class="footer-copy">Duzanjos. Alguns direitos reservados.</p>
-            </div>
-        </footer>
-    </body>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copiado: ' + text);
+            }).catch(err => {
+                console.error('Erro ao copiar:', err);
+            });
+        }
+    </script>
+</body>
 </html>
