@@ -1,1 +1,2302 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mini ERP Impressão 3D (Offline)</title>
+  <style>
+    :root{
+      --bg:#0b0c10;
+      --card:#12141b;
+      --muted:#9aa4b2;
+      --text:#e8ecf1;
+      --border:#232836;
+      --accent:#4f8cff;
+      --good:#2ecc71;
+      --warn:#f39c12;
+      --bad:#e74c3c;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 30% -10%, rgba(79,140,255,.22), transparent 60%),
+                  radial-gradient(900px 500px at 90% 0%, rgba(46,204,113,.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+    header{
+      padding:18px 16px 10px;
+      max-width:1200px;
+      margin:0 auto;
+    }
+    h1{font-size:20px;margin:0 0 4px}
+    .sub{color:var(--muted);font-size:13px;line-height:1.35}
+    main{
+      max-width:1200px;
+      margin:0 auto;
+      padding:10px 16px 28px;
+      display:grid;
+      gap:12px;
+    }
+    .tabs{display:flex;gap:8px;flex-wrap:wrap}
+    .tabbtn{
+      border:1px solid var(--border);
+      background:rgba(18,20,27,.75);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:700;
+      font-size:13px;
+    }
+    .tabbtn[aria-selected="true"]{
+      border-color: rgba(79,140,255,.7);
+      box-shadow: 0 0 0 3px rgba(79,140,255,.15) inset;
+    }
+    .card{
+      background:rgba(18,20,27,.75);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.25);
+    }
+    .card h2{
+      font-size:15px;
+      margin:0 0 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .pill{
+      font-size:12px;
+      color:var(--muted);
+      border:1px solid var(--border);
+      padding:6px 10px;
+      border-radius:999px;
+      white-space:nowrap;
+      background: rgba(15,17,23,.35);
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap:12px;
+    }
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr}
+    }
+    .kpis{
+      display:grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap:10px;
+    }
+    @media (max-width: 980px){
+      .kpis{grid-template-columns: repeat(2, 1fr)}
+    }
+    .kpi{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:10px;
+      background: rgba(15,17,23,.55);
+    }
+    .kpi .t{font-size:11px;color:var(--muted);margin-bottom:6px}
+    .kpi .v{font-size:18px;font-weight:850}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .row > *{flex:1}
+    label{display:block;font-size:12px;color:var(--muted);margin:10px 0 6px}
+    input, select, textarea{
+      width:100%;
+      border:1px solid var(--border);
+      background:#0f1117;
+      color:var(--text);
+      padding:10px 10px;
+      border-radius:12px;
+      outline:none;
+    }
+    textarea{min-height:78px;resize:vertical}
+    input:focus, select:focus, textarea:focus{
+      border-color: rgba(79,140,255,.8);
+      box-shadow: 0 0 0 3px rgba(79,140,255,.12);
+    }
+    button{
+      border:1px solid var(--border);
+      background:#0f1117;
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:800;
+      font-size:13px;
+    }
+    button.primary{
+      background: rgba(79,140,255,.14);
+      border-color: rgba(79,140,255,.55);
+    }
+    button.danger{
+      background: rgba(231,76,60,.12);
+      border-color: rgba(231,76,60,.55);
+    }
+    button.ghost{
+      background: rgba(15,17,23,.35);
+    }
+    button:disabled{opacity:.55;cursor:not-allowed}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
+    .note{color:var(--muted);font-size:12px;line-height:1.35}
+    .hidden{display:none !important}
+    table{
+      width:100%;
+      border-collapse:collapse;
+      overflow:hidden;
+      border-radius:12px;
+    }
+    th, td{
+      padding:10px 8px;
+      border-bottom:1px solid var(--border);
+      text-align:left;
+      font-size:13px;
+      vertical-align:top;
+    }
+    th{color:var(--muted);font-weight:750}
+    tr:hover td{background: rgba(79,140,255,.05)}
+    .mini{font-size:12px;color:var(--muted)}
+    .right{display:flex;gap:8px;align-items:center;justify-content:flex-end}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      border:1px solid var(--border);
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;color:var(--muted);
+      background: rgba(15,17,23,.55);
+      white-space:nowrap;
+    }
+    .dot{width:12px;height:12px;border-radius:50%;border:1px solid rgba(255,255,255,.15)}
+    .good{color:var(--good)}
+    .warn{color:var(--warn)}
+    .bad{color:var(--bad)}
+    .bar{
+      height:8px;background:#202635;border-radius:999px;overflow:hidden;margin-top:6px;
+      border:1px solid rgba(255,255,255,.05);
+    }
+    .bar > div{height:100%;background: rgba(79,140,255,.65)}
+    .split3{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap:12px;
+    }
+    @media (max-width: 980px){ .split3{grid-template-columns:1fr} }
+    .toast{
+      position:fixed;
+      bottom:16px;left:50%;
+      transform:translateX(-50%);
+      background:#0f1117;
+      border:1px solid var(--border);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      display:none;
+      max-width: min(820px, calc(100vw - 24px));
+      font-size:13px;
+    }
+    .toast.show{display:block}
+    canvas{
+      width:100%;
+      height:240px;
+      background: rgba(15,17,23,.45);
+      border:1px solid var(--border);
+      border-radius:14px;
+    }
+    .divider{height:1px;background:var(--border);margin:12px 0}
+  </style>
+</head>
+<body>
+<header>
+  <h1>Mini ERP — Impressão 3D (Offline)</h1>
+  <div class="sub">
+    Controle manual de rolos, impressoras, impressões e vendas. Calcula custo (filamento + energia + depreciação), lucro e margem.
+    Tudo fica salvo localmente no navegador. Use Backup JSON para migrar.
+  </div>
+</header>
 
+<main>
+  <div class="tabs" role="tablist" aria-label="Abas">
+    <button class="tabbtn" role="tab" id="tab-dashboard" aria-selected="true" aria-controls="panel-dashboard">Dashboard</button>
+    <button class="tabbtn" role="tab" id="tab-jobs" aria-selected="false" aria-controls="panel-jobs">Impressões</button>
+    <button class="tabbtn" role="tab" id="tab-rolls" aria-selected="false" aria-controls="panel-rolls">Rolos</button>
+    <button class="tabbtn" role="tab" id="tab-printers" aria-selected="false" aria-controls="panel-printers">Impressoras</button>
+    <button class="tabbtn" role="tab" id="tab-products" aria-selected="false" aria-controls="panel-products">Produtos</button>
+    <button class="tabbtn" role="tab" id="tab-sales" aria-selected="false" aria-controls="panel-sales">Vendas</button>
+    <button class="tabbtn" role="tab" id="tab-settings" aria-selected="false" aria-controls="panel-settings">Configurações</button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <section class="card" id="panel-dashboard" role="tabpanel" aria-labelledby="tab-dashboard">
+    <h2>
+      Visão geral
+      <span class="pill" id="db-updated">—</span>
+    </h2>
+
+    <div class="kpis">
+      <div class="kpi"><div class="t">Filamento usado</div><div class="v" id="kpi-used">0 g</div></div>
+      <div class="kpi"><div class="t">Filamento restante</div><div class="v" id="kpi-remaining">0 g</div></div>
+      <div class="kpi"><div class="t">Custo total (jobs)</div><div class="v" id="kpi-cost">R$ 0,00</div></div>
+      <div class="kpi"><div class="t">Receita (vendas)</div><div class="v" id="kpi-revenue">R$ 0,00</div></div>
+      <div class="kpi"><div class="t">Lucro (vendas)</div><div class="v" id="kpi-profit">R$ 0,00</div></div>
+      <div class="kpi"><div class="t">Margem média</div><div class="v" id="kpi-margin">0%</div></div>
+    </div>
+
+    <div style="height:12px"></div>
+
+    <div class="grid">
+      <div class="card" style="background:rgba(15,17,23,.45)">
+        <h2>Rolos e estoque <span class="pill">restante por rolo</span></h2>
+        <div style="overflow:auto;max-height:420px">
+          <table>
+            <thead>
+              <tr>
+                <th>Rolo</th>
+                <th>Restante</th>
+                <th>Uso</th>
+                <th>Custo/kg</th>
+              </tr>
+            </thead>
+            <tbody id="db-rolls"></tbody>
+          </table>
+        </div>
+        <div class="note" style="margin-top:10px">
+          Alerta: restante <b class="bad">&lt; 50g</b> e atenção <b class="warn">&lt; 200g</b>.
+        </div>
+      </div>
+
+      <div class="card" style="background:rgba(15,17,23,.45)">
+        <h2>Gráficos <span class="pill">12 meses</span></h2>
+        <label>Consumo de filamento (g) por mês</label>
+        <canvas id="chart-grams" width="900" height="300"></canvas>
+        <div style="height:10px"></div>
+        <label>Lucro (R$) por mês</label>
+        <canvas id="chart-profit" width="900" height="300"></canvas>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="split3">
+      <div class="card" style="background:rgba(15,17,23,.45)">
+        <h2>Últimas impressões <span class="pill">até 12</span></h2>
+        <div style="overflow:auto;max-height:320px">
+          <table>
+            <thead><tr><th>Data</th><th>Job</th><th>Custo</th></tr></thead>
+            <tbody id="db-last-jobs"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" style="background:rgba(15,17,23,.45)">
+        <h2>Últimas vendas <span class="pill">até 12</span></h2>
+        <div style="overflow:auto;max-height:320px">
+          <table>
+            <thead><tr><th>Data</th><th>Venda</th><th>Lucro</th></tr></thead>
+            <tbody id="db-last-sales"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" style="background:rgba(15,17,23,.45)">
+        <h2>Atalhos <span class="pill">rápido</span></h2>
+        <div class="actions">
+          <button class="primary" id="go-job">Lançar impressão</button>
+          <button class="primary" id="go-sale">Criar venda</button>
+          <button class="ghost" id="go-roll">Cadastrar rolo</button>
+          <button class="ghost" id="go-printer">Cadastrar impressora</button>
+        </div>
+        <div class="divider"></div>
+        <div class="note">
+          <b>Fluxo recomendado:</b><br>
+          1) Cadastre rolos (peso e custo) + impressora (custo e vida útil)<br>
+          2) Lance cada impressão (gramas + horas + rolo + impressora)<br>
+          3) Crie vendas e (opcional) vincule jobs para custo real por produto.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- JOBS -->
+  <section class="card hidden" id="panel-jobs" role="tabpanel" aria-labelledby="tab-jobs">
+    <h2>Impressões (Jobs) <span class="pill" id="jobs-pill">—</span></h2>
+
+    <div class="card" style="background:rgba(15,17,23,.45)">
+      <h2 style="margin:0 0 8px">
+        Lançar / editar job
+        <span class="pill" id="job-mode">novo</span>
+      </h2>
+
+      <input type="hidden" id="job-id" />
+
+      <div class="row">
+        <div>
+          <label>Data</label>
+          <input type="date" id="job-date" />
+        </div>
+        <div>
+          <label>Nome/identificação (opcional)</label>
+          <input id="job-name" placeholder="Ex.: Porta-pratos v2" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Impressora</label>
+          <select id="job-printer"></select>
+        </div>
+        <div>
+          <label>Rolo</label>
+          <select id="job-roll"></select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Filamento usado (g)</label>
+          <input type="number" id="job-grams" min="0" step="0.1" placeholder="Ex.: 42.6" />
+        </div>
+        <div>
+          <label>Tempo de impressão (horas)</label>
+          <input type="number" id="job-hours" min="0" step="0.01" placeholder="Ex.: 2.50" />
+        </div>
+        <div>
+          <label>Energia (kWh) (opcional)</label>
+          <input type="number" id="job-kwh" min="0" step="0.01" placeholder="Ex.: 0.35" />
+        </div>
+      </div>
+
+      <label>Observações (opcional)</label>
+      <textarea id="job-notes" placeholder="Ex.: 0.2mm, 15% infill, bico 0.4..."></textarea>
+
+      <div class="actions">
+        <button class="primary" id="job-save">Salvar job</button>
+        <button class="ghost" id="job-cancel">Cancelar edição</button>
+        <button class="danger" id="job-delete" disabled>Excluir job</button>
+        <span class="note" id="job-hint"></span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="note" id="job-preview"></div>
+    </div>
+
+    <div class="card" style="background:rgba(15,17,23,.45)">
+      <h2>Lista de jobs <span class="pill">clique para editar</span></h2>
+
+      <div class="row">
+        <div>
+          <label>Filtrar por impressora</label>
+          <select id="jobs-filter-printer"></select>
+        </div>
+        <div>
+          <label>Filtrar por rolo</label>
+          <select id="jobs-filter-roll"></select>
+        </div>
+        <div class="right">
+          <button class="ghost" id="jobs-clear-filters">Limpar filtros</button>
+        </div>
+      </div>
+
+      <div style="overflow:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Job</th>
+              <th>Filamento</th>
+              <th>Horas</th>
+              <th>Custo</th>
+              <th style="width:120px">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="jobs-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROLLS -->
+  <section class="card hidden" id="panel-rolls" role="tabpanel" aria-labelledby="tab-rolls">
+    <h2>Rolos <span class="pill" id="rolls-pill">—</span></h2>
+
+    <div class="grid">
+      <div class="card" style="background:rgba(15,17,23,.45)">
+        <h2 style="margin:0 0 8px">Cadastrar / editar rolo <span class="pill" id="roll-mode">novo</span></h2>
+        <input type="hidden" id="roll-id" />
+
+        <div class="row">
+          <div>
+            <label>Nome do rolo</label>
+            <input id="roll-name" placeholder="Ex.: PLA Preto MasterPrint" />
+          </div>
+          <div>
+            <label>Material</label>
+            <input id="roll-material" placeholder="Ex.: PLA / PETG / ABS" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Marca (opcional)</label>
+            <input id="roll-brand" placeholder="Ex.: Bambu / MasterPrint" />
+          </div>
+          <div>
+            <label>Cor</label>
+            <input id="roll-color" type="color" value="#ffffff" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Peso inicial (g)</label>
+            <input type="number" id="roll-start" min="0" step="1" placeholder="Ex.: 1000" />
+          </div>
+          <div>
+            <label>Custo do rolo (R$)</label>
+            <input type="number" id="roll-cost" min="0" step="0.01" placeholder="Ex.: 89.90" />
+          </div>
+          <div>
+            <label>Alerta baixo (g)</label>
+            <input type="number" id="roll-alert" min="0" step="1" placeholder="Ex.: 200" />
+          </div>
+        </div>
+
+        <label>Observações (opcional)</label>
+        <textarea id="roll-notes" placeholder="Ex.: lote, link da compra, etc."></textarea>
+
+        <div class="actions">
+          <button class="primary" id="roll-save">Salvar rolo</button>
+          <button class="ghost" id="roll-cancel">Cancelar edição</button>
+          <button class="danger" id="roll-delete" disabled>Excluir rolo</button>
+        </div>
+
+        <div class="divider"></div>
+        <div class="note" id="roll-preview"></div>
+      </div>
+
+      <div class="card" style="background:rgba(15,17,23,.45)">
+        <h2 style="margin:0 0 8px">Lista de rolos <span class="pill">clique para editar</span></h2>
+        <div style="overflow:auto;max-height:520px">
+          <table>
+            <thead>
+              <tr>
+                <th>Rolo</th>
+                <th>Restante</th>
+                <th>Uso</th>
+                <th>Custo/kg</th>
+                <th style="width:120px">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="rolls-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRINTERS -->
+  <section class="card hidden" id="panel-printers" role="tabpanel" aria-labelledby="tab-printers">
+    <h2>Impressoras <span class="pill" id="printers-pill">—</span></h2>
+
+    <div class="grid">
+      <div class="card" style="background:rgba(15,17,23,.45)">
+        <h2 style="margin:0 0 8px">Cadastrar / editar impressora <span class="pill" id="printer-mode">nova</span></h2>
+        <input type="hidden" id="printer-id" />
+
+        <div class="row">
+          <div>
+            <label>Nome</label>
+            <input id="printer-name" placeholder="Ex.: Bambu A1" />
+          </div>
+          <div>
+            <label>Modelo (opcional)</label>
+            <input id="printer-model" placeholder="Ex.: A1 + AMS" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Custo de compra (R$)</label>
+            <input type="number" id="printer-cost" min="0" step="0.01" placeholder="Ex.: 3999.00" />
+          </div>
+          <div>
+            <label>Data de compra</label>
+            <input type="date" id="printer-date" />
+          </div>
+          <div>
+            <label>Vida útil (meses)</label>
+            <input type="number" id="printer-life" min="1" step="1" placeholder="Ex.: 24" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Horas por mês (estimativa)</label>
+            <input type="number" id="printer-hours-month" min="1" step="1" placeholder="Ex.: 40" />
+          </div>
+          <div>
+            <label>Local (opcional)</label>
+            <input id="printer-location" placeholder="Ex.: Quarto / Escritório" />
+          </div>
+        </div>
+
+        <label>Observações (opcional)</label>
+        <textarea id="printer-notes" placeholder="Ex.: bico 0.4, inox, fluxo padrão..."></textarea>
+
+        <div class="actions">
+          <button class="primary" id="printer-save">Salvar impressora</button>
+          <button class="ghost" id="printer-cancel">Cancelar edição</button>
+          <button class="danger" id="printer-delete" disabled>Excluir impressora</button>
+        </div>
+
+        <div class="divider"></div>
+        <div class="note" id="printer-preview"></div>
+      </div>
+
+      <div class="card" style="background:rgba(15,17,23,.45)">
+        <h2 style="margin:0 0 8px">Lista de impressoras <span class="pill">clique para editar</span></h2>
+        <div style="overflow:auto;max-height:520px">
+          <table>
+            <thead>
+              <tr>
+                <th>Impressora</th>
+                <th>Horas lançadas</th>
+                <th>Depreciação/h</th>
+                <th style="width:120px">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="printers-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section class="card hidden" id="panel-products" role="tabpanel" aria-labelledby="tab-products">
+    <h2>Produtos <span class="pill" id="products-pill">—</span></h2>
+
+    <div class="grid">
+      <div class="card" style="background:rgba(15,17,23,.45)">
+        <h2 style="margin:0 0 8px">Cadastrar / editar produto <span class="pill" id="product-mode">novo</span></h2>
+        <input type="hidden" id="product-id" />
+
+        <div class="row">
+          <div>
+            <label>Nome do produto</label>
+            <input id="product-name" placeholder="Ex.: Suporte Unifi U6 LR" />
+          </div>
+          <div>
+            <label>Preço sugerido (R$) (opcional)</label>
+            <input type="number" id="product-price" min="0" step="0.01" placeholder="Ex.: 59.90" />
+          </div>
+        </div>
+
+        <label>Descrição (opcional)</label>
+        <textarea id="product-notes" placeholder="Ex.: material recomendado, variações, etc."></textarea>
+
+        <div class="actions">
+          <button class="primary" id="product-save">Salvar produto</button>
+          <button class="ghost" id="product-cancel">Cancelar edição</button>
+          <button class="danger" id="product-delete" disabled>Excluir produto</button>
+        </div>
+
+        <div class="divider"></div>
+        <div class="note">
+          Produtos não precisam estar vinculados a jobs. Mas se você vincular jobs nas vendas, o sistema calcula custo real.
+        </div>
+      </div>
+
+      <div class="card" style="background:rgba(15,17,23,.45)">
+        <h2 style="margin:0 0 8px">Lista de produtos <span class="pill">clique para editar</span></h2>
+        <div style="overflow:auto;max-height:520px">
+          <table>
+            <thead>
+              <tr><th>Produto</th><th>Preço sugerido</th><th style="width:120px">Ações</th></tr>
+            </thead>
+            <tbody id="products-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SALES -->
+  <section class="card hidden" id="panel-sales" role="tabpanel" aria-labelledby="tab-sales">
+    <h2>Vendas <span class="pill" id="sales-pill">—</span></h2>
+
+    <div class="card" style="background:rgba(15,17,23,.45)">
+      <h2 style="margin:0 0 8px">Criar / editar venda <span class="pill" id="sale-mode">nova</span></h2>
+      <input type="hidden" id="sale-id" />
+
+      <div class="row">
+        <div>
+          <label>Data</label>
+          <input type="date" id="sale-date" />
+        </div>
+        <div>
+          <label>Cliente (opcional)</label>
+          <input id="sale-customer" placeholder="Ex.: João / Loja X" />
+        </div>
+        <div>
+          <label>Canal (opcional)</label>
+          <input id="sale-channel" placeholder="Ex.: WhatsApp / Shopee / Mercado Livre" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Taxas (R$) (opcional)</label>
+          <input type="number" id="sale-fees" min="0" step="0.01" placeholder="Ex.: 8.50" />
+        </div>
+        <div>
+          <label>Frete (R$) (opcional)</label>
+          <input type="number" id="sale-shipping" min="0" step="0.01" placeholder="Ex.: 15.00" />
+        </div>
+        <div>
+          <label>Desconto (R$) (opcional)</label>
+          <input type="number" id="sale-discount" min="0" step="0.01" placeholder="Ex.: 5.00" />
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <h2 style="margin:0 0 8px">Itens da venda <span class="pill">produto + qty + preço</span></h2>
+
+      <div class="row">
+        <div>
+          <label>Produto</label>
+          <select id="sale-product"></select>
+        </div>
+        <div>
+          <label>Quantidade</label>
+          <input type="number" id="sale-qty" min="1" step="1" value="1" />
+        </div>
+        <div>
+          <label>Preço unitário (R$)</label>
+          <input type="number" id="sale-unit" min="0" step="0.01" placeholder="Ex.: 59.90" />
+        </div>
+      </div>
+      <div class="actions">
+        <button class="ghost" id="sale-add-item">Adicionar item</button>
+        <span class="note" id="sale-item-hint"></span>
+      </div>
+
+      <div style="overflow:auto;margin-top:10px">
+        <table>
+          <thead><tr><th>Produto</th><th>Qtd</th><th>Unit</th><th>Total</th><th style="width:120px">Ações</th></tr></thead>
+          <tbody id="sale-items-table"></tbody>
+        </table>
+      </div>
+
+      <div class="divider"></div>
+
+      <h2 style="margin:0 0 8px">Vincular jobs (opcional) <span class="pill">custo real</span></h2>
+      <div class="row">
+        <div>
+          <label>Selecionar job</label>
+          <select id="sale-job"></select>
+        </div>
+        <div class="right">
+          <button class="ghost" id="sale-add-job">Vincular job</button>
+        </div>
+      </div>
+
+      <div style="overflow:auto;margin-top:10px">
+        <table>
+          <thead><tr><th>Job</th><th>Custo</th><th style="width:120px">Ações</th></tr></thead>
+          <tbody id="sale-jobs-table"></tbody>
+        </table>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="note" id="sale-preview"></div>
+
+      <div class="actions">
+        <button class="primary" id="sale-save">Salvar venda</button>
+        <button class="ghost" id="sale-cancel">Cancelar edição</button>
+        <button class="danger" id="sale-delete" disabled>Excluir venda</button>
+      </div>
+    </div>
+
+    <div class="card" style="background:rgba(15,17,23,.45)">
+      <h2>Lista de vendas <span class="pill">clique para editar</span></h2>
+      <div class="row">
+        <div>
+          <label>Filtrar por mês</label>
+          <input type="month" id="sales-filter-month" />
+        </div>
+        <div class="right">
+          <button class="ghost" id="sales-clear-filter">Limpar filtro</button>
+        </div>
+      </div>
+
+      <div style="overflow:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Cliente</th>
+              <th>Receita</th>
+              <th>Custo</th>
+              <th>Lucro</th>
+              <th>Margem</th>
+              <th style="width:120px">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="sales-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="card hidden" id="panel-settings" role="tabpanel" aria-labelledby="tab-settings">
+    <h2>Configurações <span class="pill">moeda, energia, backup</span></h2>
+
+    <div class="split3">
+      <div class="card" style="background:rgba(15,17,23,.45)">
+        <h2 style="margin:0 0 8px">Parâmetros globais <span class="pill">custos</span></h2>
+        <label>Preço da energia (R$ / kWh)</label>
+        <input type="number" id="cfg-energy" min="0" step="0.01" placeholder="Ex.: 1.05" />
+        <label>Custo fixo extra por job (R$) (opcional)</label>
+        <input type="number" id="cfg-overhead" min="0" step="0.01" placeholder="Ex.: 0.50" />
+        <label>Moeda (só exibição)</label>
+        <select id="cfg-currency">
+          <option value="BRL">BRL (R$)</option>
+          <option value="USD">USD ($)</option>
+          <option value="EUR">EUR (€)</option>
+        </select>
+        <div class="actions">
+          <button class="primary" id="cfg-save">Salvar parâmetros</button>
+        </div>
+        <div class="note" style="margin-top:10px">
+          Se você não informar kWh no job, o custo de energia vira 0 (ou você pode lançar manualmente o kWh).
+        </div>
+      </div>
+
+      <div class="card" style="background:rgba(15,17,23,.45)">
+        <h2 style="margin:0 0 8px">Backup JSON <span class="pill">export/import</span></h2>
+        <div class="actions">
+          <button class="primary" id="export-btn">Exportar backup</button>
+          <label style="margin:0;color:var(--muted);font-size:12px">
+            Importar backup:
+            <input type="file" id="import-file" accept="application/json" style="margin-top:6px" />
+          </label>
+        </div>
+        <div class="note" style="margin-top:10px">
+          Importar substitui tudo. Exporte antes para não perder.
+        </div>
+      </div>
+
+      <div class="card" style="background:rgba(15,17,23,.45)">
+        <h2 style="margin:0 0 8px;color:var(--bad)">Zerar tudo <span class="pill">reset</span></h2>
+        <div class="note">Apaga todos os dados do navegador deste PC.</div>
+        <div class="actions">
+          <button class="danger" id="reset-btn">Apagar todos os dados</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="note">
+      <b>Dica:</b> se você quiser usar em mais de um PC, exporte o backup JSON e importe no outro.
+    </div>
+  </section>
+
+  <div class="toast" id="toast"></div>
+</main>
+
+<script>
+(() => {
+  // ------------------ Storage ------------------
+  const STORAGE_KEY = "mini_erp_impressao_3d_v1";
+
+  const $ = (sel) => document.querySelector(sel);
+
+  const nowISO = () => new Date().toISOString();
+  const todayISO = () => new Date().toISOString().slice(0,10);
+  const monthISO = (dISO) => (dISO || "").slice(0,7);
+  const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(2, 8);
+  const n = (x) => Number(x) || 0;
+
+  function round2(x){ return Math.round(n(x) * 100) / 100; }
+  function round1(x){ return Math.round(n(x) * 10) / 10; }
+
+  function escapeHtml(str){
+    return (str ?? "").toString()
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function toast(msg){
+    const el = $("#toast");
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => el.classList.remove("show"), 2400);
+  }
+
+  function defaultState(){
+    return {
+      meta: { createdAt: nowISO(), updatedAt: nowISO() },
+      config: {
+        energyPrice: 0,   // R$/kWh
+        overheadPerJob: 0,
+        currency: "BRL",
+      },
+      rolls: [],
+      printers: [],
+      jobs: [],
+      products: [],
+      sales: []
+    };
+  }
+
+  let state = loadState();
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return defaultState();
+      const s = JSON.parse(raw);
+      // sanity
+      if(!s || !s.config || !Array.isArray(s.rolls) || !Array.isArray(s.printers) || !Array.isArray(s.jobs) || !Array.isArray(s.products) || !Array.isArray(s.sales)){
+        return defaultState();
+      }
+      if(!s.meta) s.meta = { createdAt: nowISO(), updatedAt: nowISO() };
+      return s;
+    }catch{
+      return defaultState();
+    }
+  }
+
+  function saveState(){
+    state.meta.updatedAt = nowISO();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  // ------------------ Money formatting ------------------
+  function currencySymbol(){
+    const c = state.config.currency || "BRL";
+    if(c === "USD") return "$";
+    if(c === "EUR") return "€";
+    return "R$";
+  }
+  function fmtMoney(v){
+    const sym = currencySymbol();
+    const val = round2(v);
+    // estilo simples BR
+    const s = val.toFixed(2).replace(".", ",");
+    const parts = s.split(",");
+    const int = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    return `${sym} ${int},${parts[1]}`;
+  }
+  function fmtG(v){ return `${round1(v)} g`; }
+  function fmtH(v){ return `${round2(v)} h`; }
+  function fmtPct(v){ return `${Math.round(n(v))}%`; }
+
+  // ------------------ Lookups ------------------
+  const getRoll = (id) => state.rolls.find(r => r.id === id);
+  const getPrinter = (id) => state.printers.find(p => p.id === id);
+  const getProduct = (id) => state.products.find(p => p.id === id);
+  const getJob = (id) => state.jobs.find(j => j.id === id);
+
+  // ------------------ Calculations ------------------
+  function rollUsedG(rollId){
+    return state.jobs.filter(j => j.rollId === rollId).reduce((s,j)=>s+n(j.grams),0);
+  }
+  function rollRemainingG(r){
+    return n(r.startGrams) - rollUsedG(r.id);
+  }
+  function rollCostPerKg(r){
+    const start = n(r.startGrams);
+    const cost = n(r.costBRL);
+    if(start <= 0) return 0;
+    return cost / (start/1000);
+  }
+  function rollCostForGrams(r, grams){
+    const perKg = rollCostPerKg(r);
+    return perKg * (n(grams)/1000);
+  }
+
+  function printerHoursTotal(printerId){
+    return state.jobs.filter(j => j.printerId === printerId).reduce((s,j)=>s+n(j.hours),0);
+  }
+  function printerDepreciationPerHour(p){
+    const cost = n(p.purchaseCost);
+    const lifeMonths = Math.max(1, n(p.lifeMonths));
+    const hoursMonth = Math.max(1, n(p.hoursPerMonth));
+    // depreciação linear: custo / (vidaMeses * horasMes)
+    return cost / (lifeMonths * hoursMonth);
+  }
+
+  function jobCostBreakdown(job){
+    const roll = getRoll(job.rollId);
+    const printer = getPrinter(job.printerId);
+
+    const filament = roll ? rollCostForGrams(roll, job.grams) : 0;
+
+    const kwh = n(job.kwh);
+    const energy = kwh * n(state.config.energyPrice);
+
+    const dep = printer ? (n(job.hours) * printerDepreciationPerHour(printer)) : 0;
+
+    const overhead = n(state.config.overheadPerJob);
+
+    const total = filament + energy + dep + overhead;
+
+    return { filament, energy, dep, overhead, total };
+  }
+
+  function jobsTotalCost(){
+    return state.jobs.reduce((s,j)=> s + jobCostBreakdown(j).total, 0);
+  }
+
+  function totalUsedG(){
+    return state.jobs.reduce((s,j)=>s+n(j.grams),0);
+  }
+  function totalRemainingG(){
+    return state.rolls.reduce((s,r)=> s + rollRemainingG(r), 0);
+  }
+
+  function saleRevenue(sale){
+    const items = sale.items || [];
+    const itemsTotal = items.reduce((s,it)=> s + n(it.qty)*n(it.unitPrice), 0);
+    return itemsTotal - n(sale.discount) + n(sale.shipping); // shipping entra como receita se você repassa; se não quiser, deixe 0
+  }
+
+  function saleCost(sale){
+    const fees = n(sale.fees);
+    // custo = soma custo dos jobs vinculados + taxas
+    const jobIds = sale.jobIds || [];
+    const jobsCost = jobIds.reduce((s,id)=>{
+      const job = getJob(id);
+      return s + (job ? jobCostBreakdown(job).total : 0);
+    }, 0);
+    return jobsCost + fees;
+  }
+
+  function saleProfit(sale){
+    return saleRevenue(sale) - saleCost(sale);
+  }
+
+  function saleMarginPct(sale){
+    const rev = saleRevenue(sale);
+    if(rev <= 0) return 0;
+    return (saleProfit(sale) / rev) * 100;
+  }
+
+  function totalsSales(){
+    const revenue = state.sales.reduce((s,x)=>s+saleRevenue(x),0);
+    const cost = state.sales.reduce((s,x)=>s+saleCost(x),0);
+    const profit = revenue - cost;
+    const margin = revenue > 0 ? (profit/revenue)*100 : 0;
+    return { revenue, cost, profit, margin };
+  }
+
+  // ------------------ Tabs ------------------
+  const tabs = [
+    {btn:"#tab-dashboard", panel:"#panel-dashboard"},
+    {btn:"#tab-jobs", panel:"#panel-jobs"},
+    {btn:"#tab-rolls", panel:"#panel-rolls"},
+    {btn:"#tab-printers", panel:"#panel-printers"},
+    {btn:"#tab-products", panel:"#panel-products"},
+    {btn:"#tab-sales", panel:"#panel-sales"},
+    {btn:"#tab-settings", panel:"#panel-settings"},
+  ];
+
+  function setTab(panelSel){
+    for(const t of tabs){
+      const b = $(t.btn);
+      const p = $(t.panel);
+      const active = (t.panel === panelSel);
+      b.setAttribute("aria-selected", active ? "true" : "false");
+      p.classList.toggle("hidden", !active);
+    }
+    renderAll();
+  }
+  tabs.forEach(t => $(t.btn).addEventListener("click", () => setTab(t.panel)));
+
+  $("#go-job").addEventListener("click", () => setTab("#panel-jobs"));
+  $("#go-sale").addEventListener("click", () => setTab("#panel-sales"));
+  $("#go-roll").addEventListener("click", () => setTab("#panel-rolls"));
+  $("#go-printer").addEventListener("click", () => setTab("#panel-printers"));
+
+  // ------------------ Filters ------------------
+  const jobsFilter = { printerId: "ALL", rollId: "ALL" };
+  let salesMonthFilter = "";
+
+  // ------------------ Renders: Selects ------------------
+  function fillRollSelect(sel, includeAll=false){
+    const rolls = state.rolls;
+    sel.innerHTML = (includeAll ? `<option value="ALL">Todos</option>` : "");
+    if(rolls.length === 0){
+      sel.innerHTML += `<option value="">(Cadastre um rolo)</option>`;
+      return;
+    }
+    sel.innerHTML += rolls.map(r=>{
+      const rem = rollRemainingG(r);
+      const alert = n(r.alertGrams) || 200;
+      const badge = rem < 50 ? "⚠️" : (rem < alert ? "🟡" : "🟢");
+      return `<option value="${r.id}">${badge} ${escapeHtml(r.name)} — restante: ${round1(rem)}g</option>`;
+    }).join("");
+  }
+
+  function fillPrinterSelect(sel, includeAll=false){
+    const printers = state.printers;
+    sel.innerHTML = (includeAll ? `<option value="ALL">Todas</option>` : "");
+    if(printers.length === 0){
+      sel.innerHTML += `<option value="">(Cadastre uma impressora)</option>`;
+      return;
+    }
+    sel.innerHTML += printers.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join("");
+  }
+
+  function fillProductSelect(sel){
+    const products = state.products;
+    sel.innerHTML = "";
+    if(products.length === 0){
+      sel.innerHTML = `<option value="">(Cadastre um produto)</option>`;
+      return;
+    }
+    sel.innerHTML = products.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join("");
+  }
+
+  function fillJobSelectForSale(sel){
+    const jobs = [...state.jobs].sort((a,b)=> String(b.date).localeCompare(String(a.date)));
+    sel.innerHTML = "";
+    if(jobs.length === 0){
+      sel.innerHTML = `<option value="">(Nenhum job cadastrado)</option>`;
+      return;
+    }
+    sel.innerHTML = jobs.map(j=>{
+      const p = getPrinter(j.printerId);
+      const r = getRoll(j.rollId);
+      const c = jobCostBreakdown(j).total;
+      const label = `${j.date} — ${j.name || "Job"} — ${round1(j.grams)}g — ${round2(j.hours)}h — ${fmtMoney(c)} — ${p?p.name:"—"} / ${r?r.name:"—"}`;
+      return `<option value="${j.id}">${escapeHtml(label)}</option>`;
+    }).join("");
+  }
+
+  // ------------------ Dashboard ------------------
+  function statusClassRemaining(rem, alert){
+    if(rem < 50) return "bad";
+    if(rem < alert) return "warn";
+    return "good";
+  }
+
+  function renderDashboard(){
+    $("#db-updated").textContent = state.meta.updatedAt
+      ? ("Atualizado: " + new Date(state.meta.updatedAt).toLocaleString("pt-BR"))
+      : "—";
+
+    const used = totalUsedG();
+    const remaining = totalRemainingG();
+    const cost = jobsTotalCost();
+    const ts = totalsSales();
+
+    $("#kpi-used").textContent = fmtG(used);
+    $("#kpi-remaining").textContent = fmtG(remaining);
+    $("#kpi-cost").textContent = fmtMoney(cost);
+    $("#kpi-revenue").textContent = fmtMoney(ts.revenue);
+    $("#kpi-profit").textContent = fmtMoney(ts.profit);
+    $("#kpi-margin").textContent = fmtPct(ts.margin);
+
+    // rolls table
+    const tbody = $("#db-rolls");
+    tbody.innerHTML = state.rolls.map(r=>{
+      const usedR = rollUsedG(r.id);
+      const rem = rollRemainingG(r);
+      const alert = n(r.alertGrams) || 200;
+      const cls = statusClassRemaining(rem, alert);
+      const perKg = rollCostPerKg(r);
+      const pctUsed = (n(r.startGrams) > 0) ? Math.min(100, Math.max(0, (usedR / n(r.startGrams))*100)) : 0;
+
+      return `
+        <tr>
+          <td>
+            <span class="badge">
+              <span class="dot" style="background:${escapeHtml(r.color || "#fff")}"></span>
+              <span><b>${escapeHtml(r.name)}</b></span>
+            </span>
+            <div class="mini">${escapeHtml([r.material, r.brand].filter(Boolean).join(" • "))}</div>
+          </td>
+          <td><b class="${cls}">${round1(rem)}g</b><div class="mini">alerta: ${alert}g</div></td>
+          <td>
+            <b>${round1(usedR)}g</b>
+            <div class="bar"><div style="width:${pctUsed}%"></div></div>
+            <div class="mini">${Math.round(pctUsed)}% usado</div>
+          </td>
+          <td>${fmtMoney(perKg)}/kg</td>
+        </tr>
+      `;
+    }).join("");
+
+    // last jobs
+    const lastJobs = [...state.jobs].sort((a,b)=> String(b.date).localeCompare(String(a.date))).slice(0,12);
+    $("#db-last-jobs").innerHTML = lastJobs.map(j=>{
+      const c = jobCostBreakdown(j).total;
+      const name = j.name || "Job";
+      return `<tr>
+        <td>${escapeHtml(j.date)}</td>
+        <td class="mini">${escapeHtml(name)}</td>
+        <td><b>${fmtMoney(c)}</b></td>
+      </tr>`;
+    }).join("") || `<tr><td colspan="3" class="mini">Sem jobs ainda.</td></tr>`;
+
+    // last sales
+    const lastSales = [...state.sales].sort((a,b)=> String(b.date).localeCompare(String(a.date))).slice(0,12);
+    $("#db-last-sales").innerHTML = lastSales.map(s=>{
+      const prof = saleProfit(s);
+      const cls = prof >= 0 ? "good" : "bad";
+      const title = s.customer ? `Venda — ${s.customer}` : "Venda";
+      return `<tr>
+        <td>${escapeHtml(s.date)}</td>
+        <td class="mini">${escapeHtml(title)}</td>
+        <td><b class="${cls}">${fmtMoney(prof)}</b></td>
+      </tr>`;
+    }).join("") || `<tr><td colspan="3" class="mini">Sem vendas ainda.</td></tr>`;
+
+    // charts
+    drawCharts();
+  }
+
+  // ------------------ Simple charts (no libs) ------------------
+  function last12MonthsKeys(){
+    const keys = [];
+    const d = new Date();
+    d.setDate(1);
+    for(let i=11;i>=0;i--){
+      const x = new Date(d.getFullYear(), d.getMonth()-i, 1);
+      keys.push(x.toISOString().slice(0,7));
+    }
+    return keys;
+  }
+
+  function drawBarChart(canvas, labels, values, valueFormatter){
+    const ctx = canvas.getContext("2d");
+    const W = canvas.width;
+    const H = canvas.height;
+    ctx.clearRect(0,0,W,H);
+
+    // padding
+    const padL = 52, padR = 16, padT = 12, padB = 34;
+    const plotW = W - padL - padR;
+    const plotH = H - padT - padB;
+
+    // axes
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = "rgba(255,255,255,.12)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padL, padT);
+    ctx.lineTo(padL, padT + plotH);
+    ctx.lineTo(padL + plotW, padT + plotH);
+    ctx.stroke();
+
+    const maxV = Math.max(1, ...values.map(v=>Math.abs(v)));
+    const top = maxV * 1.1;
+
+    // grid + ticks
+    ctx.fillStyle = "rgba(255,255,255,.55)";
+    ctx.font = "12px system-ui, sans-serif";
+
+    const ticks = 4;
+    for(let i=0;i<=ticks;i++){
+      const t = i/ticks;
+      const y = padT + plotH - (t * plotH);
+      ctx.strokeStyle = "rgba(255,255,255,.08)";
+      ctx.beginPath();
+      ctx.moveTo(padL, y);
+      ctx.lineTo(padL + plotW, y);
+      ctx.stroke();
+
+      const v = top * t;
+      const text = valueFormatter ? valueFormatter(v) : v.toFixed(0);
+      ctx.fillText(text, 6, y+4);
+    }
+
+    // bars
+    const N = labels.length;
+    const gap = 6;
+    const barW = Math.max(6, (plotW - gap*(N-1)) / N);
+
+    for(let i=0;i<N;i++){
+      const v = values[i];
+      const h = (Math.abs(v) / top) * plotH;
+      const x = padL + i*(barW+gap);
+      const y = padT + plotH - h;
+
+      // bar color: positive accent, negative red-ish
+      if(v >= 0){
+        ctx.fillStyle = "rgba(79,140,255,.65)";
+      }else{
+        ctx.fillStyle = "rgba(231,76,60,.55)";
+      }
+      ctx.fillRect(x, y, barW, h);
+
+      // x labels (short)
+      ctx.fillStyle = "rgba(255,255,255,.55)";
+      const lab = labels[i].slice(5,7); // month
+      ctx.fillText(lab, x + Math.max(0,(barW-10)/2), padT + plotH + 22);
+    }
+  }
+
+  function drawCharts(){
+    const keys = last12MonthsKeys();
+
+    // grams per month
+    const grams = keys.map(k=>{
+      return state.jobs
+        .filter(j=> monthISO(j.date) === k)
+        .reduce((s,j)=>s+n(j.grams),0);
+    });
+
+    drawBarChart($("#chart-grams"), keys, grams, (v)=> `${Math.round(v)}g`);
+
+    // profit per month
+    const profit = keys.map(k=>{
+      return state.sales
+        .filter(s=> monthISO(s.date) === k)
+        .reduce((sum,s)=> sum + saleProfit(s), 0);
+    });
+
+    drawBarChart($("#chart-profit"), keys, profit, (v)=> fmtMoney(v));
+  }
+
+  // ------------------ Rolls CRUD ------------------
+  function resetRollForm(){
+    $("#roll-id").value = "";
+    $("#roll-mode").textContent = "novo";
+    $("#roll-name").value = "";
+    $("#roll-material").value = "";
+    $("#roll-brand").value = "";
+    $("#roll-color").value = "#ffffff";
+    $("#roll-start").value = "";
+    $("#roll-cost").value = "";
+    $("#roll-alert").value = "200";
+    $("#roll-notes").value = "";
+    $("#roll-delete").disabled = true;
+    renderRollPreview();
+  }
+
+  function renderRollPreview(){
+    const id = $("#roll-id").value.trim();
+    const name = $("#roll-name").value.trim() || "(sem nome)";
+    const start = n($("#roll-start").value);
+    const cost = n($("#roll-cost").value);
+    const alert = n($("#roll-alert").value) || 200;
+    const perKg = (start>0) ? cost / (start/1000) : 0;
+
+    let used = 0, rem = start;
+    if(id){
+      const r = getRoll(id);
+      if(r){
+        used = rollUsedG(r.id);
+        rem = rollRemainingG(r);
+      }
+    }
+    $("#roll-preview").innerHTML = `
+      <span class="badge">
+        <span class="dot" style="background:${escapeHtml($("#roll-color").value || "#fff")}"></span>
+        <span><b>${escapeHtml(name)}</b></span>
+      </span>
+      <div class="mini" style="margin-top:8px">
+        Peso inicial: <b>${round1(start)}g</b> • Custo do rolo: <b>${fmtMoney(cost)}</b> • Custo/kg: <b>${fmtMoney(perKg)}/kg</b><br/>
+        Alerta baixo: <b>${alert}g</b> • (Se já existir) Usado: <b>${round1(used)}g</b> • Restante: <b>${round1(rem)}g</b>
+      </div>
+    `;
+  }
+
+  ["#roll-name","#roll-material","#roll-brand","#roll-color","#roll-start","#roll-cost","#roll-alert","#roll-notes"]
+    .forEach(sel => $(sel).addEventListener("input", renderRollPreview));
+
+  function editRoll(id){
+    const r = getRoll(id);
+    if(!r) return;
+    $("#roll-id").value = r.id;
+    $("#roll-mode").textContent = "editando";
+    $("#roll-name").value = r.name || "";
+    $("#roll-material").value = r.material || "";
+    $("#roll-brand").value = r.brand || "";
+    $("#roll-color").value = r.color || "#ffffff";
+    $("#roll-start").value = r.startGrams ?? "";
+    $("#roll-cost").value = r.costBRL ?? "";
+    $("#roll-alert").value = r.alertGrams ?? "200";
+    $("#roll-notes").value = r.notes || "";
+    $("#roll-delete").disabled = false;
+    renderRollPreview();
+    toast("Editando rolo.");
+  }
+
+  function deleteRoll(id){
+    const used = rollUsedG(id);
+    const ok = confirm(used > 0
+      ? "Este rolo tem jobs vinculados. Excluir vai apagar também esses jobs. Continuar?"
+      : "Excluir este rolo?");
+    if(!ok) return;
+
+    state.rolls = state.rolls.filter(r=>r.id!==id);
+    state.jobs = state.jobs.filter(j=>j.rollId!==id);
+
+    // também remove vínculos em vendas (jobIds)
+    state.sales.forEach(s=>{
+      s.jobIds = (s.jobIds||[]).filter(jid => !!getJob(jid)); // getJob agora já não acha os removidos
+    });
+
+    saveState();
+    resetRollForm();
+    renderAll();
+    toast("Rolo excluído.");
+  }
+
+  $("#roll-save").addEventListener("click", ()=>{
+    const id = $("#roll-id").value.trim();
+    const name = $("#roll-name").value.trim();
+    const material = $("#roll-material").value.trim();
+    const brand = $("#roll-brand").value.trim();
+    const color = $("#roll-color").value || "#ffffff";
+    const startGrams = n($("#roll-start").value);
+    const costBRL = n($("#roll-cost").value);
+    const alertGrams = n($("#roll-alert").value) || 200;
+    const notes = $("#roll-notes").value.trim();
+
+    if(!name){ toast("Informe o nome do rolo."); return; }
+    if(!(startGrams >= 0)){ toast("Informe o peso inicial (g)."); return; }
+    if(!(costBRL >= 0)){ toast("Informe o custo do rolo (R$)."); return; }
+
+    if(id){
+      const idx = state.rolls.findIndex(r=>r.id===id);
+      if(idx>=0){
+        state.rolls[idx] = {...state.rolls[idx], name, material, brand, color, startGrams, costBRL, alertGrams, notes};
+        toast("Rolo atualizado.");
+      }
+    }else{
+      state.rolls.push({ id: uid(), name, material, brand, color, startGrams, costBRL, alertGrams, notes, createdAt: nowISO() });
+      toast("Rolo cadastrado.");
+    }
+    saveState();
+    resetRollForm();
+    renderAll();
+  });
+
+  $("#roll-cancel").addEventListener("click", ()=>{
+    resetRollForm();
+    toast("Edição cancelada.");
+  });
+
+  $("#roll-delete").addEventListener("click", ()=>{
+    const id = $("#roll-id").value.trim();
+    if(!id) return;
+    deleteRoll(id);
+  });
+
+  function renderRolls(){
+    $("#rolls-pill").textContent = `${state.rolls.length} rolo(s)`;
+
+    const tbody = $("#rolls-table");
+    tbody.innerHTML = state.rolls.map(r=>{
+      const used = rollUsedG(r.id);
+      const rem = rollRemainingG(r);
+      const alert = n(r.alertGrams)||200;
+      const cls = statusClassRemaining(rem, alert);
+      const perKg = rollCostPerKg(r);
+      const pctUsed = (n(r.startGrams) > 0) ? Math.min(100, Math.max(0, (used / n(r.startGrams))*100)) : 0;
+
+      return `
+        <tr>
+          <td>
+            <span class="badge">
+              <span class="dot" style="background:${escapeHtml(r.color || "#fff")}"></span>
+              <span><b>${escapeHtml(r.name)}</b></span>
+            </span>
+            <div class="mini">${escapeHtml([r.material, r.brand].filter(Boolean).join(" • "))}</div>
+          </td>
+          <td><b class="${cls}">${round1(rem)}g</b><div class="mini">alerta: ${alert}g</div></td>
+          <td>
+            <b>${round1(used)}g</b>
+            <div class="bar"><div style="width:${pctUsed}%"></div></div>
+          </td>
+          <td>${fmtMoney(perKg)}/kg</td>
+          <td>
+            <button class="ghost" data-act="edit" data-id="${r.id}">Editar</button>
+            <button class="danger" data-act="del" data-id="${r.id}">Excluir</button>
+          </td>
+        </tr>
+      `;
+    }).join("") || `<tr><td colspan="5" class="mini">Nenhum rolo cadastrado.</td></tr>`;
+
+    tbody.querySelectorAll("button[data-act]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const id = btn.getAttribute("data-id");
+        const act = btn.getAttribute("data-act");
+        if(act==="edit") editRoll(id);
+        if(act==="del") deleteRoll(id);
+      });
+    });
+  }
+
+  // ------------------ Printers CRUD ------------------
+  function resetPrinterForm(){
+    $("#printer-id").value = "";
+    $("#printer-mode").textContent = "nova";
+    $("#printer-name").value = "";
+    $("#printer-model").value = "";
+    $("#printer-cost").value = "";
+    $("#printer-date").value = todayISO();
+    $("#printer-life").value = "24";
+    $("#printer-hours-month").value = "40";
+    $("#printer-location").value = "";
+    $("#printer-notes").value = "";
+    $("#printer-delete").disabled = true;
+    renderPrinterPreview();
+  }
+
+  function renderPrinterPreview(){
+    const name = $("#printer-name").value.trim() || "(sem nome)";
+    const cost = n($("#printer-cost").value);
+    const life = Math.max(1, n($("#printer-life").value) || 24);
+    const hm = Math.max(1, n($("#printer-hours-month").value) || 40);
+    const depH = cost / (life * hm);
+
+    $("#printer-preview").innerHTML = `
+      <div class="mini">
+        <b>${escapeHtml(name)}</b><br/>
+        Depreciação estimada: <b>${fmtMoney(depH)}/hora</b> (custo ${fmtMoney(cost)}, ${life} meses, ${hm}h/mês)
+      </div>
+    `;
+  }
+
+  ["#printer-name","#printer-model","#printer-cost","#printer-date","#printer-life","#printer-hours-month","#printer-location","#printer-notes"]
+    .forEach(sel => $(sel).addEventListener("input", renderPrinterPreview));
+
+  function editPrinter(id){
+    const p = getPrinter(id);
+    if(!p) return;
+    $("#printer-id").value = p.id;
+    $("#printer-mode").textContent = "editando";
+    $("#printer-name").value = p.name || "";
+    $("#printer-model").value = p.model || "";
+    $("#printer-cost").value = p.purchaseCost ?? "";
+    $("#printer-date").value = p.purchaseDate || todayISO();
+    $("#printer-life").value = p.lifeMonths ?? "24";
+    $("#printer-hours-month").value = p.hoursPerMonth ?? "40";
+    $("#printer-location").value = p.location || "";
+    $("#printer-notes").value = p.notes || "";
+    $("#printer-delete").disabled = false;
+    renderPrinterPreview();
+    toast("Editando impressora.");
+  }
+
+  function deletePrinter(id){
+    const usedH = printerHoursTotal(id);
+    const ok = confirm(usedH > 0
+      ? "Esta impressora tem jobs vinculados. Excluir vai apagar esses jobs. Continuar?"
+      : "Excluir esta impressora?");
+    if(!ok) return;
+
+    state.printers = state.printers.filter(p=>p.id!==id);
+    state.jobs = state.jobs.filter(j=>j.printerId!==id);
+
+    // limpa vínculos em vendas
+    state.sales.forEach(s=>{
+      s.jobIds = (s.jobIds||[]).filter(jid => !!getJob(jid));
+    });
+
+    saveState();
+    resetPrinterForm();
+    renderAll();
+    toast("Impressora excluída.");
+  }
+
+  $("#printer-save").addEventListener("click", ()=>{
+    const id = $("#printer-id").value.trim();
+    const name = $("#printer-name").value.trim();
+    const model = $("#printer-model").value.trim();
+    const purchaseCost = n($("#printer-cost").value);
+    const purchaseDate = $("#printer-date").value || todayISO();
+    const lifeMonths = Math.max(1, n($("#printer-life").value) || 24);
+    const hoursPerMonth = Math.max(1, n($("#printer-hours-month").value) || 40);
+    const location = $("#printer-location").value.trim();
+    const notes = $("#printer-notes").value.trim();
+
+    if(!name){ toast("Informe o nome da impressora."); return; }
+    if(!(purchaseCost >= 0)){ toast("Informe o custo de compra (R$)."); return; }
+
+    if(id){
+      const idx = state.printers.findIndex(p=>p.id===id);
+      if(idx>=0){
+        state.printers[idx] = {...state.printers[idx], name, model, purchaseCost, purchaseDate, lifeMonths, hoursPerMonth, location, notes};
+        toast("Impressora atualizada.");
+      }
+    }else{
+      state.printers.push({ id: uid(), name, model, purchaseCost, purchaseDate, lifeMonths, hoursPerMonth, location, notes, createdAt: nowISO() });
+      toast("Impressora cadastrada.");
+    }
+    saveState();
+    resetPrinterForm();
+    renderAll();
+  });
+
+  $("#printer-cancel").addEventListener("click", ()=>{
+    resetPrinterForm();
+    toast("Edição cancelada.");
+  });
+  $("#printer-delete").addEventListener("click", ()=>{
+    const id = $("#printer-id").value.trim();
+    if(!id) return;
+    deletePrinter(id);
+  });
+
+  function renderPrinters(){
+    $("#printers-pill").textContent = `${state.printers.length} impressora(s)`;
+
+    const tbody = $("#printers-table");
+    tbody.innerHTML = state.printers.map(p=>{
+      const hours = printerHoursTotal(p.id);
+      const depH = printerDepreciationPerHour(p);
+      return `
+        <tr>
+          <td>
+            <b>${escapeHtml(p.name)}</b>
+            <div class="mini">${escapeHtml([p.model, p.location].filter(Boolean).join(" • "))}</div>
+          </td>
+          <td><b>${round2(hours)}h</b></td>
+          <td><b>${fmtMoney(depH)}/h</b></td>
+          <td>
+            <button class="ghost" data-act="edit" data-id="${p.id}">Editar</button>
+            <button class="danger" data-act="del" data-id="${p.id}">Excluir</button>
+          </td>
+        </tr>
+      `;
+    }).join("") || `<tr><td colspan="4" class="mini">Nenhuma impressora cadastrada.</td></tr>`;
+
+    tbody.querySelectorAll("button[data-act]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const id = btn.getAttribute("data-id");
+        const act = btn.getAttribute("data-act");
+        if(act==="edit") editPrinter(id);
+        if(act==="del") deletePrinter(id);
+      });
+    });
+  }
+
+  // ------------------ Jobs CRUD ------------------
+  function resetJobForm(){
+    $("#job-id").value = "";
+    $("#job-mode").textContent = "novo";
+    $("#job-date").value = todayISO();
+    $("#job-name").value = "";
+    $("#job-grams").value = "";
+    $("#job-hours").value = "";
+    $("#job-kwh").value = "";
+    $("#job-notes").value = "";
+    $("#job-delete").disabled = true;
+    renderJobPreview();
+  }
+
+  function renderJobPreview(){
+    const can = state.rolls.length && state.printers.length;
+    $("#job-save").disabled = !can;
+    $("#job-hint").textContent = can ? "" : "Cadastre pelo menos 1 rolo e 1 impressora para lançar jobs.";
+
+    const roll = getRoll($("#job-roll").value);
+    const printer = getPrinter($("#job-printer").value);
+
+    const grams = n($("#job-grams").value);
+    const hours = n($("#job-hours").value);
+    const kwh = n($("#job-kwh").value);
+
+    const faux = {
+      rollId: roll ? roll.id : "",
+      printerId: printer ? printer.id : "",
+      grams, hours, kwh
+    };
+
+    const b = jobCostBreakdown(faux);
+
+    const rollInfo = roll ? `${roll.name} (${fmtMoney(rollCostPerKg(roll))}/kg)` : "—";
+    const printerInfo = printer ? `${printer.name} (${fmtMoney(printerDepreciationPerHour(printer))}/h)` : "—";
+
+    $("#job-preview").innerHTML = `
+      <b>Prévia de custo do job</b><br/>
+      Rolo: <b>${escapeHtml(rollInfo)}</b><br/>
+      Impressora: <b>${escapeHtml(printerInfo)}</b><br/>
+      Filamento: <b>${fmtMoney(b.filament)}</b> • Energia: <b>${fmtMoney(b.energy)}</b> • Depreciação: <b>${fmtMoney(b.dep)}</b> • Extra fixo: <b>${fmtMoney(b.overhead)}</b><br/>
+      <span class="badge"><b>Total estimado: ${fmtMoney(b.total)}</b></span>
+    `;
+  }
+
+  ["#job-date","#job-name","#job-roll","#job-printer","#job-grams","#job-hours","#job-kwh","#job-notes"]
+    .forEach(sel => $(sel).addEventListener("input", renderJobPreview));
+  $("#job-roll").addEventListener("change", renderJobPreview);
+  $("#job-printer").addEventListener("change", renderJobPreview);
+
+  function editJob(id){
+    const j = getJob(id);
+    if(!j) return;
+    $("#job-id").value = j.id;
+    $("#job-mode").textContent = "editando";
+    $("#job-date").value = j.date || todayISO();
+    $("#job-name").value = j.name || "";
+    $("#job-roll").value = j.rollId || "";
+    $("#job-printer").value = j.printerId || "";
+    $("#job-grams").value = j.grams ?? "";
+    $("#job-hours").value = j.hours ?? "";
+    $("#job-kwh").value = j.kwh ?? "";
+    $("#job-notes").value = j.notes || "";
+    $("#job-delete").disabled = false;
+    renderJobPreview();
+    toast("Editando job.");
+  }
+
+  function deleteJob(id){
+    const ok = confirm("Excluir este job? Isso altera custos e estoque.");
+    if(!ok) return;
+
+    state.jobs = state.jobs.filter(j=>j.id!==id);
+
+    // remove vínculos em vendas
+    state.sales.forEach(s=>{
+      s.jobIds = (s.jobIds||[]).filter(jid => jid !== id);
+    });
+
+    saveState();
+    resetJobForm();
+    renderAll();
+    toast("Job excluído.");
+  }
+
+  $("#job-save").addEventListener("click", ()=>{
+    const id = $("#job-id").value.trim();
+    const date = $("#job-date").value || todayISO();
+    const name = $("#job-name").value.trim();
+    const rollId = $("#job-roll").value;
+    const printerId = $("#job-printer").value;
+    const grams = n($("#job-grams").value);
+    const hours = n($("#job-hours").value);
+    const kwh = ($("#job-kwh").value === "" ? 0 : n($("#job-kwh").value));
+    const notes = $("#job-notes").value.trim();
+
+    if(!rollId){ toast("Selecione um rolo."); return; }
+    if(!printerId){ toast("Selecione uma impressora."); return; }
+    if(!(grams >= 0)){ toast("Informe gramas (>=0)."); return; }
+    if(!(hours >= 0)){ toast("Informe horas (>=0)."); return; }
+
+    if(id){
+      const idx = state.jobs.findIndex(j=>j.id===id);
+      if(idx>=0){
+        state.jobs[idx] = {...state.jobs[idx], date, name, rollId, printerId, grams, hours, kwh, notes};
+        toast("Job atualizado.");
+      }
+    }else{
+      state.jobs.push({ id: uid(), date, name, rollId, printerId, grams, hours, kwh, notes, createdAt: nowISO() });
+      toast("Job salvo.");
+    }
+
+    saveState();
+    resetJobForm();
+    renderAll();
+  });
+
+  $("#job-cancel").addEventListener("click", ()=>{
+    resetJobForm();
+    toast("Edição cancelada.");
+  });
+
+  $("#job-delete").addEventListener("click", ()=>{
+    const id = $("#job-id").value.trim();
+    if(!id) return;
+    deleteJob(id);
+  });
+
+  function renderJobs(){
+    $("#jobs-pill").textContent = `${state.jobs.length} job(s)`;
+
+    // filters selects
+    fillPrinterSelect($("#jobs-filter-printer"), true);
+    fillRollSelect($("#jobs-filter-roll"), true);
+    $("#jobs-filter-printer").value = jobsFilter.printerId;
+    $("#jobs-filter-roll").value = jobsFilter.rollId;
+
+    let jobs = [...state.jobs].sort((a,b)=> String(b.date).localeCompare(String(a.date)));
+    if(jobsFilter.printerId !== "ALL") jobs = jobs.filter(j=>j.printerId===jobsFilter.printerId);
+    if(jobsFilter.rollId !== "ALL") jobs = jobs.filter(j=>j.rollId===jobsFilter.rollId);
+
+    const tbody = $("#jobs-table");
+    tbody.innerHTML = jobs.map(j=>{
+      const roll = getRoll(j.rollId);
+      const printer = getPrinter(j.printerId);
+      const b = jobCostBreakdown(j);
+
+      const rollDot = roll ? `<span class="dot" style="background:${escapeHtml(roll.color||"#fff")}"></span>` : "";
+      const title = j.name || "Job";
+
+      return `
+        <tr>
+          <td>${escapeHtml(j.date)}</td>
+          <td>
+            <b>${escapeHtml(title)}</b>
+            <div class="mini">${escapeHtml((printer?printer.name:"—") + " • " + (roll?roll.name:"—"))}</div>
+          </td>
+          <td>${rollDot} <b>${round1(j.grams)}g</b></td>
+          <td><b>${round2(j.hours)}h</b></td>
+          <td><b>${fmtMoney(b.total)}</b><div class="mini">F:${fmtMoney(b.filament)} E:${fmtMoney(b.energy)} D:${fmtMoney(b.dep)}</div></td>
+          <td>
+            <button class="ghost" data-act="edit" data-id="${j.id}">Editar</button>
+            <button class="danger" data-act="del" data-id="${j.id}">Excluir</button>
+          </td>
+        </tr>
+      `;
+    }).join("") || `<tr><td colspan="6" class="mini">Nenhum job cadastrado.</td></tr>`;
+
+    tbody.querySelectorAll("button[data-act]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const id = btn.getAttribute("data-id");
+        const act = btn.getAttribute("data-act");
+        if(act==="edit") editJob(id);
+        if(act==="del") deleteJob(id);
+      });
+    });
+
+    // fill job form selects
+    fillPrinterSelect($("#job-printer"), false);
+    fillRollSelect($("#job-roll"), false);
+
+    // preserve selection if possible
+    if($("#job-printer").value === "" && state.printers.length) $("#job-printer").value = state.printers[0].id;
+    if($("#job-roll").value === "" && state.rolls.length) $("#job-roll").value = state.rolls[0].id;
+
+    renderJobPreview();
+  }
+
+  $("#jobs-filter-printer").addEventListener("change", (e)=>{
+    jobsFilter.printerId = e.target.value;
+    renderJobs();
+  });
+  $("#jobs-filter-roll").addEventListener("change", (e)=>{
+    jobsFilter.rollId = e.target.value;
+    renderJobs();
+  });
+  $("#jobs-clear-filters").addEventListener("click", ()=>{
+    jobsFilter.printerId = "ALL";
+    jobsFilter.rollId = "ALL";
+    renderJobs();
+  });
+
+  // ------------------ Products CRUD ------------------
+  function resetProductForm(){
+    $("#product-id").value = "";
+    $("#product-mode").textContent = "novo";
+    $("#product-name").value = "";
+    $("#product-price").value = "";
+    $("#product-notes").value = "";
+    $("#product-delete").disabled = true;
+  }
+
+  function editProduct(id){
+    const p = getProduct(id);
+    if(!p) return;
+    $("#product-id").value = p.id;
+    $("#product-mode").textContent = "editando";
+    $("#product-name").value = p.name || "";
+    $("#product-price").value = p.suggestedPrice ?? "";
+    $("#product-notes").value = p.notes || "";
+    $("#product-delete").disabled = false;
+    toast("Editando produto.");
+  }
+
+  function deleteProduct(id){
+    const ok = confirm("Excluir este produto?");
+    if(!ok) return;
+    state.products = state.products.filter(p=>p.id!==id);
+
+    // remove de vendas
+    state.sales.forEach(s=>{
+      s.items = (s.items||[]).filter(it => it.productId !== id);
+    });
+
+    saveState();
+    resetProductForm();
+    renderAll();
+    toast("Produto excluído.");
+  }
+
+  $("#product-save").addEventListener("click", ()=>{
+    const id = $("#product-id").value.trim();
+    const name = $("#product-name").value.trim();
+    const suggestedPrice = ($("#product-price").value === "" ? null : n($("#product-price").value));
+    const notes = $("#product-notes").value.trim();
+
+    if(!name){ toast("Informe o nome do produto."); return; }
+
+    if(id){
+      const idx = state.products.findIndex(p=>p.id===id);
+      if(idx>=0){
+        state.products[idx] = {...state.products[idx], name, suggestedPrice, notes};
+        toast("Produto atualizado.");
+      }
+    }else{
+      state.products.push({ id: uid(), name, suggestedPrice, notes, createdAt: nowISO() });
+      toast("Produto cadastrado.");
+    }
+
+    saveState();
+    resetProductForm();
+    renderAll();
+  });
+
+  $("#product-cancel").addEventListener("click", ()=>{
+    resetProductForm();
+    toast("Edição cancelada.");
+  });
+  $("#product-delete").addEventListener("click", ()=>{
+    const id = $("#product-id").value.trim();
+    if(!id) return;
+    deleteProduct(id);
+  });
+
+  function renderProducts(){
+    $("#products-pill").textContent = `${state.products.length} produto(s)`;
+
+    const tbody = $("#products-table");
+    tbody.innerHTML = state.products.map(p=>{
+      const price = (p.suggestedPrice == null) ? "—" : fmtMoney(p.suggestedPrice);
+      return `
+        <tr>
+          <td><b>${escapeHtml(p.name)}</b><div class="mini">${escapeHtml(p.notes||"")}</div></td>
+          <td><b>${price}</b></td>
+          <td>
+            <button class="ghost" data-act="edit" data-id="${p.id}">Editar</button>
+            <button class="danger" data-act="del" data-id="${p.id}">Excluir</button>
+          </td>
+        </tr>
+      `;
+    }).join("") || `<tr><td colspan="3" class="mini">Nenhum produto cadastrado.</td></tr>`;
+
+    tbody.querySelectorAll("button[data-act]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const id = btn.getAttribute("data-id");
+        const act = btn.getAttribute("data-act");
+        if(act==="edit") editProduct(id);
+        if(act==="del") deleteProduct(id);
+      });
+    });
+  }
+
+  // ------------------ Sales CRUD ------------------
+  let saleDraft = { items: [], jobIds: [] };
+
+  function resetSaleForm(){
+    $("#sale-id").value = "";
+    $("#sale-mode").textContent = "nova";
+    $("#sale-date").value = todayISO();
+    $("#sale-customer").value = "";
+    $("#sale-channel").value = "";
+    $("#sale-fees").value = "";
+    $("#sale-shipping").value = "";
+    $("#sale-discount").value = "";
+    $("#sale-qty").value = "1";
+    $("#sale-unit").value = "";
+    $("#sale-delete").disabled = true;
+
+    saleDraft = { items: [], jobIds: [] };
+
+    renderSaleDraftTables();
+    renderSalePreview();
+  }
+
+  function renderSaleDraftTables(){
+    const itemsT = $("#sale-items-table");
+    itemsT.innerHTML = (saleDraft.items || []).map((it, idx)=>{
+      const p = getProduct(it.productId);
+      const total = n(it.qty) * n(it.unitPrice);
+      return `
+        <tr>
+          <td><b>${escapeHtml(p?p.name:"—")}</b></td>
+          <td>${n(it.qty)}</td>
+          <td>${fmtMoney(n(it.unitPrice))}</td>
+          <td><b>${fmtMoney(total)}</b></td>
+          <td><button class="danger" data-idx="${idx}" data-act="delitem">Remover</button></td>
+        </tr>
+      `;
+    }).join("") || `<tr><td colspan="5" class="mini">Sem itens.</td></tr>`;
+
+    itemsT.querySelectorAll("button[data-act='delitem']").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const idx = n(btn.getAttribute("data-idx"));
+        saleDraft.items.splice(idx, 1);
+        renderSaleDraftTables();
+        renderSalePreview();
+      });
+    });
+
+    const jobsT = $("#sale-jobs-table");
+    jobsT.innerHTML = (saleDraft.jobIds || []).map((jid, idx)=>{
+      const j = getJob(jid);
+      const c = j ? jobCostBreakdown(j).total : 0;
+      const label = j ? `${j.date} — ${j.name||"Job"} — ${round1(j.grams)}g — ${round2(j.hours)}h` : "(job removido)";
+      return `
+        <tr>
+          <td class="mini">${escapeHtml(label)}</td>
+          <td><b>${fmtMoney(c)}</b></td>
+          <td><button class="danger" data-idx="${idx}" data-act="deljob">Remover</button></td>
+        </tr>
+      `;
+    }).join("") || `<tr><td colspan="3" class="mini">Sem jobs vinculados.</td></tr>`;
+
+    jobsT.querySelectorAll("button[data-act='deljob']").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const idx = n(btn.getAttribute("data-idx"));
+        saleDraft.jobIds.splice(idx, 1);
+        renderSaleDraftTables();
+        renderSalePreview();
+      });
+    });
+  }
+
+  function renderSalePreview(){
+    const sale = {
+      items: saleDraft.items || [],
+      jobIds: saleDraft.jobIds || [],
+      fees: n($("#sale-fees").value),
+      shipping: n($("#sale-shipping").value),
+      discount: n($("#sale-discount").value),
+      date: $("#sale-date").value || todayISO(),
+      customer: $("#sale-customer").value.trim()
+    };
+
+    const rev = saleRevenue(sale);
+    const cost = saleCost(sale);
+    const profit = rev - cost;
+    const margin = rev > 0 ? (profit/rev)*100 : 0;
+    const cls = profit >= 0 ? "good" : "bad";
+
+    $("#sale-preview").innerHTML = `
+      <b>Resumo da venda</b><br/>
+      Receita: <b>${fmtMoney(rev)}</b> • Custo (jobs + taxas): <b>${fmtMoney(cost)}</b><br/>
+      Lucro: <b class="${cls}">${fmtMoney(profit)}</b> • Margem: <b class="${cls}">${fmtPct(margin)}</b><br/>
+      <span class="mini">Obs.: frete foi somado à receita. Se você não repassa, deixe frete = 0.</span>
+    `;
+  }
+
+  ["#sale-date","#sale-customer","#sale-channel","#sale-fees","#sale-shipping","#sale-discount"]
+    .forEach(sel => $(sel).addEventListener("input", renderSalePreview));
+
+  $("#sale-add-item").addEventListener("click", ()=>{
+    const productId = $("#sale-product").value;
+    const qty = Math.max(1, n($("#sale-qty").value) || 1);
+    const unit = n($("#sale-unit").value);
+
+    if(!productId){ toast("Selecione um produto."); return; }
+    if(!(unit >= 0)){ toast("Informe o preço unitário (>=0)."); return; }
+
+    saleDraft.items.push({ productId, qty, unitPrice: unit });
+    renderSaleDraftTables();
+    renderSalePreview();
+    toast("Item adicionado.");
+  });
+
+  $("#sale-add-job").addEventListener("click", ()=>{
+    const jobId = $("#sale-job").value;
+    if(!jobId){ toast("Selecione um job."); return; }
+    if(saleDraft.jobIds.includes(jobId)){ toast("Esse job já está vinculado."); return; }
+    saleDraft.jobIds.push(jobId);
+    renderSaleDraftTables();
+    renderSalePreview();
+    toast("Job vinculado.");
+  });
+
+  function editSale(id){
+    const s = state.sales.find(x=>x.id===id);
+    if(!s) return;
+
+    $("#sale-id").value = s.id;
+    $("#sale-mode").textContent = "editando";
+    $("#sale-date").value = s.date || todayISO();
+    $("#sale-customer").value = s.customer || "";
+    $("#sale-channel").value = s.channel || "";
+    $("#sale-fees").value = s.fees ?? "";
+    $("#sale-shipping").value = s.shipping ?? "";
+    $("#sale-discount").value = s.discount ?? "";
+    $("#sale-delete").disabled = false;
+
+    saleDraft = {
+      items: [...(s.items||[])],
+      jobIds: [...(s.jobIds||[])]
+    };
+
+    renderSaleDraftTables();
+    renderSalePreview();
+    toast("Editando venda.");
+  }
+
+  function deleteSale(id){
+    const ok = confirm("Excluir esta venda?");
+    if(!ok) return;
+    state.sales = state.sales.filter(s=>s.id!==id);
+    saveState();
+    resetSaleForm();
+    renderAll();
+    toast("Venda excluída.");
+  }
+
+  $("#sale-save").addEventListener("click", ()=>{
+    const id = $("#sale-id").value.trim();
+    const date = $("#sale-date").value || todayISO();
+    const customer = $("#sale-customer").value.trim();
+    const channel = $("#sale-channel").value.trim();
+    const fees = n($("#sale-fees").value);
+    const shipping = n($("#sale-shipping").value);
+    const discount = n($("#sale-discount").value);
+
+    if((saleDraft.items||[]).length === 0){
+      toast("Adicione pelo menos 1 item na venda.");
+      return;
+    }
+
+    const payload = {
+      id: id || uid(),
+      date, customer, channel,
+      fees, shipping, discount,
+      items: saleDraft.items || [],
+      jobIds: saleDraft.jobIds || [],
+      createdAt: id ? undefined : nowISO()
+    };
+
+    if(id){
+      const idx = state.sales.findIndex(s=>s.id===id);
+      if(idx>=0){
+        state.sales[idx] = { ...state.sales[idx], ...payload };
+        toast("Venda atualizada.");
+      }
+    }else{
+      state.sales.push(payload);
+      toast("Venda salva.");
+    }
+
+    saveState();
+    resetSaleForm();
+    renderAll();
+  });
+
+  $("#sale-cancel").addEventListener("click", ()=>{
+    resetSaleForm();
+    toast("Edição cancelada.");
+  });
+
+  $("#sale-delete").addEventListener("click", ()=>{
+    const id = $("#sale-id").value.trim();
+    if(!id) return;
+    deleteSale(id);
+  });
+
+  function renderSales(){
+    $("#sales-pill").textContent = `${state.sales.length} venda(s)`;
+
+    // fill selects for draft
+    fillProductSelect($("#sale-product"));
+    fillJobSelectForSale($("#sale-job"));
+
+    // auto-fill unit price with suggested if empty
+    $("#sale-product").addEventListener("change", ()=>{
+      const pid = $("#sale-product").value;
+      const p = getProduct(pid);
+      if(p && ($("#sale-unit").value === "")){
+        if(p.suggestedPrice != null) $("#sale-unit").value = p.suggestedPrice;
+      }
+    });
+
+    // filter
+    $("#sales-filter-month").value = salesMonthFilter || "";
+    let sales = [...state.sales].sort((a,b)=> String(b.date).localeCompare(String(a.date)));
+    if(salesMonthFilter){
+      sales = sales.filter(s=> monthISO(s.date) === salesMonthFilter);
+    }
+
+    const tbody = $("#sales-table");
+    tbody.innerHTML = sales.map(s=>{
+      const rev = saleRevenue(s);
+      const cost = saleCost(s);
+      const prof = rev - cost;
+      const margin = rev>0 ? (prof/rev)*100 : 0;
+      const cls = prof >= 0 ? "good" : "bad";
+
+      return `
+        <tr>
+          <td>${escapeHtml(s.date)}</td>
+          <td class="mini">${escapeHtml(s.customer || "—")}</td>
+          <td><b>${fmtMoney(rev)}</b></td>
+          <td><b>${fmtMoney(cost)}</b></td>
+          <td><b class="${cls}">${fmtMoney(prof)}</b></td>
+          <td><b class="${cls}">${fmtPct(margin)}</b></td>
+          <td>
+            <button class="ghost" data-act="edit" data-id="${s.id}">Editar</button>
+            <button class="danger" data-act="del" data-id="${s.id}">Excluir</button>
+          </td>
+        </tr>
+      `;
+    }).join("") || `<tr><td colspan="7" class="mini">Nenhuma venda cadastrada.</td></tr>`;
+
+    tbody.querySelectorAll("button[data-act]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const id = btn.getAttribute("data-id");
+        const act = btn.getAttribute("data-act");
+        if(act==="edit") editSale(id);
+        if(act==="del") deleteSale(id);
+      });
+    });
+
+    renderSalePreview();
+  }
+
+  $("#sales-filter-month").addEventListener("change", (e)=>{
+    salesMonthFilter = e.target.value || "";
+    renderSales();
+  });
+  $("#sales-clear-filter").addEventListener("click", ()=>{
+    salesMonthFilter = "";
+    $("#sales-filter-month").value = "";
+    renderSales();
+  });
+
+  // ------------------ Settings ------------------
+  function renderSettings(){
+    $("#cfg-energy").value = state.config.energyPrice ?? 0;
+    $("#cfg-overhead").value = state.config.overheadPerJob ?? 0;
+    $("#cfg-currency").value = state.config.currency || "BRL";
+  }
+
+  $("#cfg-save").addEventListener("click", ()=>{
+    state.config.energyPrice = n($("#cfg-energy").value);
+    state.config.overheadPerJob = n($("#cfg-overhead").value);
+    state.config.currency = $("#cfg-currency").value || "BRL";
+    saveState();
+    renderAll();
+    toast("Parâmetros salvos.");
+  });
+
+  $("#export-btn").addEventListener("click", ()=>{
+    const data = JSON.stringify(state, null, 2);
+    const blob = new Blob([data], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `backup_mini_erp_3d_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast("Backup exportado.");
+  });
+
+  $("#import-file").addEventListener("change", async (e)=>{
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    try{
+      const txt = await file.text();
+      const parsed = JSON.parse(txt);
+      if(!parsed || !parsed.config || !Array.isArray(parsed.rolls) || !Array.isArray(parsed.printers) || !Array.isArray(parsed.jobs) || !Array.isArray(parsed.products) || !Array.isArray(parsed.sales)){
+        alert("Arquivo inválido.");
+        e.target.value = "";
+        return;
+      }
+      const ok = confirm("Importar vai substituir seus dados atuais. Continuar?");
+      if(!ok){ e.target.value=""; return; }
+
+      state = parsed;
+      if(!state.meta) state.meta = { createdAt: nowISO(), updatedAt: nowISO() };
+      saveState();
+      resetRollForm();
+      resetPrinterForm();
+      resetJobForm();
+      resetProductForm();
+      resetSaleForm();
+      renderAll();
+      toast("Backup importado.");
+      e.target.value = "";
+    }catch{
+      alert("Não foi possível importar. JSON inválido.");
+      e.target.value = "";
+    }
+  });
+
+  $("#reset-btn").addEventListener("click", ()=>{
+    const ok = confirm("Tem certeza? Isso apaga tudo e não dá pra desfazer.");
+    if(!ok) return;
+    localStorage.removeItem(STORAGE_KEY);
+    state = defaultState();
+    saveState();
+    resetRollForm();
+    resetPrinterForm();
+    resetJobForm();
+    resetProductForm();
+    resetSaleForm();
+    renderAll();
+    toast("Dados apagados.");
+  });
+
+  // ------------------ Render All ------------------
+  function renderAll(){
+    // pills
+    $("#rolls-pill").textContent = `${state.rolls.length} rolo(s)`;
+    $("#printers-pill").textContent = `${state.printers.length} impressora(s)`;
+    $("#products-pill").textContent = `${state.products.length} produto(s)`;
+    $("#sales-pill").textContent = `${state.sales.length} venda(s)`;
+    $("#jobs-pill").textContent = `${state.jobs.length} job(s)`;
+
+    // selects for forms
+    fillRollSelect($("#job-roll"), false);
+    fillPrinterSelect($("#job-printer"), false);
+
+    fillPrinterSelect($("#jobs-filter-printer"), true);
+    fillRollSelect($("#jobs-filter-roll"), true);
+
+    // ensure defaults
+    if(!$("#job-date").value) $("#job-date").value = todayISO();
+    if(!$("#printer-date").value) $("#printer-date").value = todayISO();
+    if(!$("#sale-date").value) $("#sale-date").value = todayISO();
+
+    // render sections
+    renderDashboard();
+    renderRolls();
+    renderPrinters();
+    renderJobs();
+    renderProducts();
+    renderSales();
+    renderSettings();
+
+    // update previews
+    renderRollPreview();
+    renderPrinterPreview();
+    renderJobPreview();
+    renderSalePreview();
+  }
+
+  // ------------------ Init ------------------
+  // defaults
+  $("#job-date").value = todayISO();
+  $("#printer-date").value = todayISO();
+  $("#sale-date").value = todayISO();
+
+  resetRollForm();
+  resetPrinterForm();
+  resetJobForm();
+  resetProductForm();
+  resetSaleForm();
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
