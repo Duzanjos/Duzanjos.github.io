@@ -1,5 +1,5 @@
 {
-  "updated_at": "13/11/2026 07:28:14",
+  "updated_at": "13/11/2026 07:46:21",
   "services": [
     {
       "id": "caixa",
@@ -7,7 +7,7 @@
       "category": "Bancos",
       "url": "https://www.caixa.gov.br",
       "status": "down",
-      "latency": 2844,
+      "latency": 2516,
       "detail": "Erro HTTP 302"
     },
     {
@@ -16,8 +16,8 @@
       "category": "Bancos",
       "url": "https://www.itau.com.br",
       "status": "operational",
-      "latency": 295,
-      "detail": "Online (HTTP 403)"
+      "latency": 166,
+      "detail": "Online (WAF HTTP 403)"
     },
     {
       "id": "bb",
@@ -25,7 +25,7 @@
       "category": "Bancos",
       "url": "https://www.bb.com.br",
       "status": "operational",
-      "latency": 1145,
+      "latency": 375,
       "detail": "HTTP 200"
     },
     {
@@ -34,7 +34,7 @@
       "category": "Bancos",
       "url": "https://banco.bradesco",
       "status": "operational",
-      "latency": 381,
+      "latency": 177,
       "detail": "HTTP 200"
     },
     {
@@ -43,8 +43,8 @@
       "category": "Bancos",
       "url": "https://www.santander.com.br",
       "status": "operational",
-      "latency": 89,
-      "detail": "Online (HTTP 403)"
+      "latency": 183,
+      "detail": "Online (WAF HTTP 403)"
     },
     {
       "id": "nubank",
@@ -52,7 +52,7 @@
       "category": "Bancos",
       "url": "https://nubank.com.br",
       "status": "operational",
-      "latency": 246,
+      "latency": 191,
       "detail": "HTTP 200"
     },
     {
@@ -61,7 +61,7 @@
       "category": "Bancos",
       "url": "https://inter.co",
       "status": "operational",
-      "latency": 247,
+      "latency": 242,
       "detail": "HTTP 200"
     },
     {
@@ -70,7 +70,7 @@
       "category": "Bancos",
       "url": "https://www.sicoob.com.br",
       "status": "operational",
-      "latency": 1269,
+      "latency": 670,
       "detail": "HTTP 200"
     },
     {
@@ -79,7 +79,7 @@
       "category": "Bancos",
       "url": "https://www.sicredi.com.br",
       "status": "operational",
-      "latency": 458,
+      "latency": 436,
       "detail": "HTTP 200"
     },
     {
@@ -88,7 +88,7 @@
       "category": "Bancos",
       "url": "https://www.bcb.gov.br/estabilidadefinanceira/pix",
       "status": "operational",
-      "latency": 166,
+      "latency": 776,
       "detail": "HTTP 200"
     },
     {
@@ -98,7 +98,7 @@
       "url": "https://outlook.office.com",
       "status": "down",
       "latency": 0,
-      "detail": "<urlopen error [Errno 104] Connection reset by peer>"
+      "detail": "Inacessível ([Errno 101] Network is unreachable)"
     },
     {
       "id": "office365",
@@ -106,7 +106,7 @@
       "category": "Microsoft",
       "url": "https://www.office.com",
       "status": "operational",
-      "latency": 93,
+      "latency": 58,
       "detail": "HTTP 200"
     },
     {
@@ -115,7 +115,7 @@
       "category": "Microsoft",
       "url": "https://teams.microsoft.com",
       "status": "operational",
-      "latency": 144,
+      "latency": 131,
       "detail": "HTTP 200"
     },
     {
@@ -124,7 +124,7 @@
       "category": "Google",
       "url": "https://mail.google.com",
       "status": "operational",
-      "latency": 514,
+      "latency": 389,
       "detail": "HTTP 200"
     },
     {
@@ -133,7 +133,7 @@
       "category": "Google",
       "url": "https://www.google.com",
       "status": "operational",
-      "latency": 150,
+      "latency": 114,
       "detail": "HTTP 200"
     },
     {
@@ -142,7 +142,7 @@
       "category": "Governo",
       "url": "https://www.gov.br",
       "status": "operational",
-      "latency": 1159,
+      "latency": 1212,
       "detail": "HTTP 200"
     },
     {
@@ -150,9 +150,9 @@
       "name": "WhatsApp Web",
       "category": "Comunicação",
       "url": "https://web.whatsapp.com",
-      "status": "operational",
-      "latency": 130,
-      "detail": "HTTP 200"
+      "status": "down",
+      "latency": 95,
+      "detail": "Erro HTTP 400"
     }
   ]
 }
