@@ -1,24 +1,50 @@
 import json
 import os
+import socket
+import ssl
 import time
 from datetime import datetime, timezone, timedelta
+from urllib.parse import urlparse
 import urllib.request
 import urllib.error
 
 TZ_BR = timezone(timedelta(hours=-3))
+
+BROWSER_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Connection": "keep-alive"
+}
+
+def check_tcp_tls(url):
+    """Fallback: testa se o servidor responde na porta 443 (TLS handshake) quando WAF bloqueia HTTP."""
+    parsed = urlparse(url)
+    host = parsed.hostname
+    port = parsed.port or (443 if parsed.scheme == "https" else 80)
+    start = time.time()
+    try:
+        sock = socket.create_connection((host, port), timeout=10)
+        if parsed.scheme == "https":
+            context = ssl.create_default_context()
+            with context.wrap_socket(sock, server_hostname=host):
+                pass
+        else:
+            sock.close()
+        latency = int((time.time() - start) * 1000)
+        return {"status": "operational", "latency": latency, "detail": "Online (TLS/Porta 443 OK)"}
+    except Exception as e:
+        return {"status": "down", "latency": 0, "detail": f"Inacessível ({str(e)[:45]})"}
 
 def check_service(service):
     url = service["url"]
     stype = service.get("type", "http")
     start = time.time()
     
-    req = urllib.request.Request(
-        url,
-        headers={"User-Agent": "Mozilla/5.0 (StatusMonitor-Duzanjos/1.0)"}
-    )
+    req = urllib.request.Request(url, headers=BROWSER_HEADERS)
     
     try:
-        with urllib.request.urlopen(req, timeout=12) as resp:
+        with urllib.request.urlopen(req, timeout=15) as resp:
             latency = int((time.time() - start) * 1000)
             code = resp.getcode()
             
@@ -34,17 +60,18 @@ def check_service(service):
                     status = "down"
                 return {"status": status, "latency": latency, "detail": desc}
             
-            status = "degraded" if latency > 2500 else "operational"
+            status = "degraded" if latency > 3500 else "operational"
             return {"status": status, "latency": latency, "detail": f"HTTP {code}"}
             
     except urllib.error.HTTPError as e:
         latency = int((time.time() - start) * 1000)
-        # Muitos bancos bloqueiam User-Agent de bot com 403/401, o que significa que o servidor está online
-        if e.code in (401, 403, 405):
-            return {"status": "operational", "latency": latency, "detail": f"Online (HTTP {e.code})"}
+        # WAF de bancos frequentemente retorna 401, 403, 405 ou 429 para IPs de cloud
+        if e.code in (401, 403, 405, 429):
+            return {"status": "operational", "latency": latency, "detail": f"Online (WAF HTTP {e.code})"}
         return {"status": "down", "latency": latency, "detail": f"Erro HTTP {e.code}"}
-    except Exception as e:
-        return {"status": "down", "latency": 0, "detail": str(e)[:60]}
+    except Exception:
+        # Se o firewall derrubou a requisição HTTP (ex: Caixa / Gov), valida via conexão direta TLS/443
+        return check_tcp_tls(url)
 
 def send_discord_alert(webhook_url, down_services):
     if not webhook_url or not down_services:
@@ -67,7 +94,6 @@ def main():
     with open("services.json", "r", encoding="utf-8") as f:
         services = json.load(f)
 
-    # Carrega estado anterior para evitar spam de alertas repetidos
     previous_states = {}
     if os.path.exists("status.json"):
         try:
