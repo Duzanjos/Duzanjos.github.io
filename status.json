@@ -1,5 +1,10 @@
 {
-  "updated_at": "13/11/2026 09:35:54",
+  "updated_at": "13/11/2026 09:40:19",
+  "config": {
+    "max_consecutive_failures": 5,
+    "latency_threshold_ms": 4500,
+    "alert_cooldown_minutes": 30
+  },
   "services": [
     {
       "id": "caixa",
@@ -7,7 +12,8 @@
       "category": "Bancos",
       "url": "https://www.caixa.gov.br",
       "status": "operational",
-      "latency": 1001,
+      "latency": 1062,
+      "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
     {
@@ -16,7 +22,8 @@
       "category": "Bancos",
       "url": "https://www.itau.com.br",
       "status": "operational",
-      "latency": 206,
+      "latency": 101,
+      "fail_streak": 0,
       "detail": "Online (WAF HTTP 403)"
     },
     {
@@ -25,7 +32,8 @@
       "category": "Bancos",
       "url": "https://www.bb.com.br",
       "status": "operational",
-      "latency": 448,
+      "latency": 418,
+      "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
     {
@@ -34,7 +42,8 @@
       "category": "Bancos",
       "url": "https://banco.bradesco",
       "status": "operational",
-      "latency": 222,
+      "latency": 327,
+      "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
     {
@@ -43,7 +52,8 @@
       "category": "Bancos",
       "url": "https://www.santander.com.br",
       "status": "operational",
-      "latency": 113,
+      "latency": 88,
+      "fail_streak": 0,
       "detail": "Online (WAF HTTP 403)"
     },
     {
@@ -52,7 +62,8 @@
       "category": "Bancos",
       "url": "https://nubank.com.br",
       "status": "operational",
-      "latency": 257,
+      "latency": 300,
+      "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
     {
@@ -61,7 +72,8 @@
       "category": "Bancos",
       "url": "https://inter.co",
       "status": "operational",
-      "latency": 262,
+      "latency": 150,
+      "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
     {
@@ -70,7 +82,8 @@
       "category": "Bancos",
       "url": "https://www.sicoob.com.br",
       "status": "operational",
-      "latency": 855,
+      "latency": 2963,
+      "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
     {
@@ -79,7 +92,8 @@
       "category": "Bancos",
       "url": "https://www.sicredi.com.br",
       "status": "operational",
-      "latency": 393,
+      "latency": 300,
+      "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
     {
@@ -88,7 +102,8 @@
       "category": "Bancos",
       "url": "https://www.bcb.gov.br",
       "status": "operational",
-      "latency": 1660,
+      "latency": 1036,
+      "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
     {
@@ -96,9 +111,10 @@
       "name": "Outlook",
       "category": "Microsoft",
       "url": "https://outlook.office.com/owa/",
-      "status": "down",
-      "latency": 138,
-      "detail": "Fora do ar (HTTP 417)"
+      "status": "degraded",
+      "latency": 125,
+      "fail_streak": 1,
+      "detail": "Instável (1/5 tentativas) • Sem resposta (HTTP 417)"
     },
     {
       "id": "office365",
@@ -106,7 +122,8 @@
       "category": "Microsoft",
       "url": "https://portal.office.com",
       "status": "operational",
-      "latency": 355,
+      "latency": 298,
+      "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
     {
@@ -115,7 +132,8 @@
       "category": "Microsoft",
       "url": "https://teams.microsoft.com",
       "status": "operational",
-      "latency": 111,
+      "latency": 93,
+      "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
     {
@@ -124,7 +142,8 @@
       "category": "Google",
       "url": "https://mail.google.com",
       "status": "operational",
-      "latency": 552,
+      "latency": 471,
+      "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
     {
@@ -133,7 +152,8 @@
       "category": "Google",
       "url": "https://www.google.com",
       "status": "operational",
-      "latency": 170,
+      "latency": 222,
+      "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
     {
@@ -142,7 +162,8 @@
       "category": "Governo",
       "url": "https://www.gov.br",
       "status": "operational",
-      "latency": 4320,
+      "latency": 3775,
+      "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
     {
@@ -151,7 +172,8 @@
       "category": "Comunicação",
       "url": "https://web.whatsapp.com",
       "status": "operational",
-      "latency": 163,
+      "latency": 113,
+      "fail_streak": 0,
       "detail": "Online (Meta Status API)"
     },
     {
@@ -160,7 +182,8 @@
       "category": "Redes Sociais",
       "url": "https://www.instagram.com",
       "status": "operational",
-      "latency": 57,
+      "latency": 53,
+      "fail_streak": 0,
       "detail": "Online (Meta Status API)"
     },
     {
@@ -169,7 +192,8 @@
       "category": "Redes Sociais",
       "url": "https://www.facebook.com",
       "status": "operational",
-      "latency": 60,
+      "latency": 58,
+      "fail_streak": 0,
       "detail": "Online (Meta Status API)"
     },
     {
@@ -178,7 +202,8 @@
       "category": "Redes Sociais",
       "url": "https://x.com",
       "status": "operational",
-      "latency": 102,
+      "latency": 159,
+      "fail_streak": 0,
       "detail": "Online (HTTP 401)"
     },
     {
@@ -187,7 +212,8 @@
       "category": "Redes Sociais",
       "url": "https://www.tiktok.com",
       "status": "operational",
-      "latency": 1652,
+      "latency": 748,
+      "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
     {
@@ -196,7 +222,8 @@
       "category": "Redes Sociais",
       "url": "https://www.youtube.com",
       "status": "operational",
-      "latency": 347,
+      "latency": 406,
+      "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
     {
@@ -205,7 +232,8 @@
       "category": "Redes Sociais",
       "url": "https://www.linkedin.com",
       "status": "operational",
-      "latency": 62,
+      "latency": 89,
+      "fail_streak": 0,
       "detail": "Online (HTTP 403)"
     }
   ]
