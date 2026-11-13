@@ -63,7 +63,8 @@ def evaluate_code(code, latency, stype, latency_limit):
     if stype == "bank" and code in (401, 403, 405, 429):
         return {"ok": True, "status": "operational", "latency": latency, "detail": f"Online (WAF HTTP {code})"}
     
-    if code in (401, 403, 405):
+    # 417 ocorre frequentemente em endpoints OWA/Microsoft quando acessados sem cookie de sessão
+    if code in (401, 403, 405, 417):
         return {"ok": True, "status": "operational", "latency": latency, "detail": f"Online (HTTP {code})"}
 
     if code >= 500:
@@ -174,7 +175,6 @@ def main():
                 final_status = "down"
                 detail = f"Fora do ar ({fail_streak}/{max_failures} falhas) • {res['detail']}"
             else:
-                # Ainda não atingiu o limite de falhas: marca como observação (degraded) sem disparar alarme crítico
                 final_status = "degraded"
                 detail = f"Instável ({fail_streak}/{max_failures} tentativas) • {res['detail']}"
 
@@ -190,7 +190,6 @@ def main():
         }
         results.append(entry)
 
-        # Só dispara webhook na exata transição para "down" após atingir max_failures
         if final_status == "down" and prev_status != "down":
             newly_down.append(entry)
 
