@@ -119,8 +119,56 @@
     "id": "whatsapp",
     "name": "WhatsApp",
     "category": "Comunicação",
-    "url": "https://static.whatsapp.net/rsrc.php/v3/yz/r/ujTY9i_Jhs1.png",
-    "fallback_url": "https://www.whatsapp.com",
+    "url": "https://metastatus.com/data/orgs.json",
+    "fallback_url": "https://web.whatsapp.com",
+    "type": "metastatus",
+    "meta_keyword": "whatsapp"
+  },
+  {
+    "id": "instagram",
+    "name": "Instagram",
+    "category": "Redes Sociais",
+    "url": "https://metastatus.com/data/orgs.json",
+    "fallback_url": "https://www.instagram.com",
+    "type": "metastatus",
+    "meta_keyword": "instagram"
+  },
+  {
+    "id": "facebook",
+    "name": "Facebook",
+    "category": "Redes Sociais",
+    "url": "https://metastatus.com/data/orgs.json",
+    "fallback_url": "https://www.facebook.com",
+    "type": "metastatus",
+    "meta_keyword": "facebook"
+  },
+  {
+    "id": "x_twitter",
+    "name": "X (Twitter)",
+    "category": "Redes Sociais",
+    "url": "https://api.x.com/2/tweets",
+    "fallback_url": "https://x.com",
+    "type": "http"
+  },
+  {
+    "id": "tiktok",
+    "name": "TikTok",
+    "category": "Redes Sociais",
+    "url": "https://www.tiktok.com",
+    "type": "http"
+  },
+  {
+    "id": "youtube",
+    "name": "YouTube",
+    "category": "Redes Sociais",
+    "url": "https://www.youtube.com",
+    "type": "http"
+  },
+  {
+    "id": "linkedin",
+    "name": "LinkedIn",
+    "category": "Redes Sociais",
+    "url": "https://www.linkedin.com",
     "type": "http"
   }
 ]
