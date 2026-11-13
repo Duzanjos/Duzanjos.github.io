@@ -1,14 +1,14 @@
 {
-  "updated_at": "13/11/2026 07:46:21",
+  "updated_at": "13/11/2026 09:30:46",
   "services": [
     {
       "id": "caixa",
       "name": "Caixa Econômica",
       "category": "Bancos",
       "url": "https://www.caixa.gov.br",
-      "status": "down",
-      "latency": 2516,
-      "detail": "Erro HTTP 302"
+      "status": "operational",
+      "latency": 1088,
+      "detail": "Online (HTTP 200)"
     },
     {
       "id": "itau",
@@ -16,7 +16,7 @@
       "category": "Bancos",
       "url": "https://www.itau.com.br",
       "status": "operational",
-      "latency": 166,
+      "latency": 130,
       "detail": "Online (WAF HTTP 403)"
     },
     {
@@ -25,8 +25,8 @@
       "category": "Bancos",
       "url": "https://www.bb.com.br",
       "status": "operational",
-      "latency": 375,
-      "detail": "HTTP 200"
+      "latency": 1080,
+      "detail": "Online (HTTP 200)"
     },
     {
       "id": "bradesco",
@@ -34,8 +34,8 @@
       "category": "Bancos",
       "url": "https://banco.bradesco",
       "status": "operational",
-      "latency": 177,
-      "detail": "HTTP 200"
+      "latency": 302,
+      "detail": "Online (HTTP 200)"
     },
     {
       "id": "santander",
@@ -43,7 +43,7 @@
       "category": "Bancos",
       "url": "https://www.santander.com.br",
       "status": "operational",
-      "latency": 183,
+      "latency": 87,
       "detail": "Online (WAF HTTP 403)"
     },
     {
@@ -52,8 +52,8 @@
       "category": "Bancos",
       "url": "https://nubank.com.br",
       "status": "operational",
-      "latency": 191,
-      "detail": "HTTP 200"
+      "latency": 231,
+      "detail": "Online (HTTP 200)"
     },
     {
       "id": "inter",
@@ -61,8 +61,8 @@
       "category": "Bancos",
       "url": "https://inter.co",
       "status": "operational",
-      "latency": 242,
-      "detail": "HTTP 200"
+      "latency": 308,
+      "detail": "Online (HTTP 200)"
     },
     {
       "id": "sicoob",
@@ -70,8 +70,8 @@
       "category": "Bancos",
       "url": "https://www.sicoob.com.br",
       "status": "operational",
-      "latency": 670,
-      "detail": "HTTP 200"
+      "latency": 1849,
+      "detail": "Online (HTTP 200)"
     },
     {
       "id": "sicredi",
@@ -79,35 +79,35 @@
       "category": "Bancos",
       "url": "https://www.sicredi.com.br",
       "status": "operational",
-      "latency": 436,
-      "detail": "HTTP 200"
+      "latency": 215,
+      "detail": "Online (HTTP 200)"
     },
     {
       "id": "pix",
       "name": "Pix (Banco Central)",
       "category": "Bancos",
-      "url": "https://www.bcb.gov.br/estabilidadefinanceira/pix",
+      "url": "https://www.bcb.gov.br",
       "status": "operational",
-      "latency": 776,
-      "detail": "HTTP 200"
+      "latency": 1652,
+      "detail": "Online (HTTP 200)"
     },
     {
       "id": "outlook",
       "name": "Outlook",
       "category": "Microsoft",
-      "url": "https://outlook.office.com",
+      "url": "https://outlook.office.com/owa/",
       "status": "down",
-      "latency": 0,
-      "detail": "Inacessível ([Errno 101] Network is unreachable)"
+      "latency": 80,
+      "detail": "Fora do ar (HTTP 417)"
     },
     {
       "id": "office365",
       "name": "Office 365",
       "category": "Microsoft",
-      "url": "https://www.office.com",
+      "url": "https://portal.office.com",
       "status": "operational",
-      "latency": 58,
-      "detail": "HTTP 200"
+      "latency": 373,
+      "detail": "Online (HTTP 200)"
     },
     {
       "id": "teams",
@@ -115,8 +115,8 @@
       "category": "Microsoft",
       "url": "https://teams.microsoft.com",
       "status": "operational",
-      "latency": 131,
-      "detail": "HTTP 200"
+      "latency": 103,
+      "detail": "Online (HTTP 200)"
     },
     {
       "id": "gmail",
@@ -124,8 +124,8 @@
       "category": "Google",
       "url": "https://mail.google.com",
       "status": "operational",
-      "latency": 389,
-      "detail": "HTTP 200"
+      "latency": 503,
+      "detail": "Online (HTTP 200)"
     },
     {
       "id": "google",
@@ -133,8 +133,8 @@
       "category": "Google",
       "url": "https://www.google.com",
       "status": "operational",
-      "latency": 114,
-      "detail": "HTTP 200"
+      "latency": 159,
+      "detail": "Online (HTTP 200)"
     },
     {
       "id": "gov",
@@ -142,17 +142,17 @@
       "category": "Governo",
       "url": "https://www.gov.br",
       "status": "operational",
-      "latency": 1212,
-      "detail": "HTTP 200"
+      "latency": 1069,
+      "detail": "Online (HTTP 200)"
     },
     {
       "id": "whatsapp",
-      "name": "WhatsApp Web",
+      "name": "WhatsApp",
       "category": "Comunicação",
-      "url": "https://web.whatsapp.com",
+      "url": "https://www.whatsapp.com",
       "status": "down",
-      "latency": 95,
-      "detail": "Erro HTTP 400"
+      "latency": 117,
+      "detail": "Fora do ar (HTTP 404)"
     }
   ]
 }
