@@ -12,6 +12,21 @@ USER_AGENT = (
     "Chrome/131.0.0.0 Safari/537.36"
 )
 
+def load_config():
+    defaults = {
+        "max_consecutive_failures": 5,
+        "latency_threshold_ms": 4500,
+        "alert_cooldown_minutes": 30
+    }
+    if os.path.exists("config.json"):
+        try:
+            with open("config.json", "r", encoding="utf-8") as f:
+                data = json.load(f)
+                defaults.update(data)
+        except Exception:
+            pass
+    return defaults
+
 def curl_probe(url, timeout=15):
     cmd = [
         "curl",
@@ -40,19 +55,19 @@ def curl_probe(url, timeout=15):
     except Exception as e:
         return 0, 0, str(e)
 
-def evaluate_code(code, latency, stype):
+def evaluate_code(code, latency, stype, latency_limit):
     if 200 <= code < 400:
-        status = "degraded" if latency > 4500 else "operational"
-        return {"status": status, "latency": latency, "detail": f"Online (HTTP {code})"}
+        status = "degraded" if latency > latency_limit else "operational"
+        return {"ok": True, "status": status, "latency": latency, "detail": f"Online (HTTP {code})"}
     
     if stype == "bank" and code in (401, 403, 405, 429):
-        return {"status": "operational", "latency": latency, "detail": f"Online (WAF HTTP {code})"}
+        return {"ok": True, "status": "operational", "latency": latency, "detail": f"Online (WAF HTTP {code})"}
     
     if code in (401, 403, 405):
-        return {"status": "operational", "latency": latency, "detail": f"Online (HTTP {code})"}
+        return {"ok": True, "status": "operational", "latency": latency, "detail": f"Online (HTTP {code})"}
 
     if code >= 500:
-        return {"status": "down", "latency": latency, "detail": f"Erro no Servidor (HTTP {code})"}
+        return {"ok": False, "status": "down", "latency": latency, "detail": f"Erro HTTP {code}"}
 
     return None
 
@@ -74,12 +89,12 @@ def check_metastatus(url, keyword="whatsapp"):
                         if status_val not in ("", "ok", "operational", "no known issues", "none"):
                             issues.append(f"{name}: {svc.get('status')}")
             if issues:
-                return {"status": "down", "latency": latency, "detail": " | ".join(issues)[:65]}
-            return {"status": "operational", "latency": latency, "detail": "Online (Meta Status API)"}
+                return {"ok": False, "status": "down", "latency": latency, "detail": " | ".join(issues)[:65]}
+            return {"ok": True, "status": "operational", "latency": latency, "detail": "Online (Meta Status API)"}
     except Exception:
         return None
 
-def check_service(service):
+def check_service(service, latency_limit):
     url = service["url"]
     fallback = service.get("fallback_url")
     stype = service.get("type", "http")
@@ -91,27 +106,27 @@ def check_service(service):
             return meta_res
 
     code, latency, err = curl_probe(url)
-    result = evaluate_code(code, latency, stype)
+    result = evaluate_code(code, latency, stype, latency_limit)
     if result:
         return result
 
     if fallback:
         fb_code, fb_latency, fb_err = curl_probe(fallback)
-        fb_result = evaluate_code(fb_code, fb_latency, stype)
+        fb_result = evaluate_code(fb_code, fb_latency, stype, latency_limit)
         if fb_result:
             return fb_result
         err = fb_err or err
 
     reason = f"HTTP {code}" if code > 0 else (err[:50] if err else "Sem resposta / Timeout")
-    return {"status": "down", "latency": latency, "detail": f"Fora do ar ({reason})"}
+    return {"ok": False, "status": "down", "latency": latency, "detail": f"Sem resposta ({reason})"}
 
 def send_discord_alert(webhook_url, down_services):
     if not webhook_url or not down_services:
         return
     import urllib.request
-    lines = [f"🔴 **{s['name']}** ({s['detail']})" for s in down_services]
+    lines = [f"🔴 **{s['name']}** ({s['detail']} — {s['fail_streak']} falhas seguidas)" for s in down_services]
     payload = {
-        "content": "🚨 **ALERTA DE INDISPONIBILIDADE DETECTADO!**\n" + "\n".join(lines)
+        "content": "🚨 **ALERTA CONFIRMADO DE INDISPONIBILIDADE!**\n" + "\n".join(lines)
     }
     req = urllib.request.Request(
         webhook_url,
@@ -124,15 +139,19 @@ def send_discord_alert(webhook_url, down_services):
         print("Falha ao enviar webhook:", e)
 
 def main():
+    cfg = load_config()
+    max_failures = int(cfg.get("max_consecutive_failures", 5))
+    latency_limit = int(cfg.get("latency_threshold_ms", 4500))
+
     with open("services.json", "r", encoding="utf-8") as f:
         services = json.load(f)
 
-    previous_states = {}
+    previous_map = {}
     if os.path.exists("status.json"):
         try:
             with open("status.json", "r", encoding="utf-8") as f:
                 old_data = json.load(f)
-                previous_states = {s["id"]: s["status"] for s in old_data.get("services", [])}
+                previous_map = {s["id"]: s for s in old_data.get("services", [])}
         except Exception:
             pass
 
@@ -140,23 +159,44 @@ def main():
     newly_down = []
 
     for svc in services:
-        res = check_service(svc)
+        res = check_service(svc, latency_limit)
+        prev = previous_map.get(svc["id"], {})
+        prev_streak = int(prev.get("fail_streak", 0))
+        prev_status = prev.get("status", "operational")
+
+        if res["ok"]:
+            fail_streak = 0
+            final_status = res["status"]
+            detail = res["detail"]
+        else:
+            fail_streak = prev_streak + 1
+            if fail_streak >= max_failures:
+                final_status = "down"
+                detail = f"Fora do ar ({fail_streak}/{max_failures} falhas) • {res['detail']}"
+            else:
+                # Ainda não atingiu o limite de falhas: marca como observação (degraded) sem disparar alarme crítico
+                final_status = "degraded"
+                detail = f"Instável ({fail_streak}/{max_failures} tentativas) • {res['detail']}"
+
         entry = {
             "id": svc["id"],
             "name": svc["name"],
             "category": svc["category"],
             "url": svc.get("fallback_url") or svc["url"],
-            "status": res["status"],
+            "status": final_status,
             "latency": res["latency"],
-            "detail": res["detail"]
+            "fail_streak": fail_streak,
+            "detail": detail
         }
         results.append(entry)
 
-        if res["status"] == "down" and previous_states.get(svc["id"]) != "down":
+        # Só dispara webhook na exata transição para "down" após atingir max_failures
+        if final_status == "down" and prev_status != "down":
             newly_down.append(entry)
 
     output = {
         "updated_at": datetime.now(TZ_BR).strftime("%d/%m/%Y %H:%M:%S"),
+        "config": cfg,
         "services": results
     }
 
