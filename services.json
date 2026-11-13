@@ -1,1 +1,37 @@
-
+[
+  {
+    "id": "ms365",
+    "name": "Microsoft 365 / Outlook",
+    "category": "Produtividade",
+    "url": "https://outlook.office.com",
+    "type": "http"
+  },
+  {
+    "id": "github",
+    "name": "GitHub Status",
+    "category": "Infraestrutura",
+    "url": "https://www.githubstatus.com/api/v2/status.json",
+    "type": "statuspage"
+  },
+  {
+    "id": "cloudflare",
+    "name": "Cloudflare",
+    "category": "Rede / DNS",
+    "url": "https://www.cloudflarestatus.com/api/v2/status.json",
+    "type": "statuspage"
+  },
+  {
+    "id": "nubank",
+    "name": "Nubank",
+    "category": "Bancos",
+    "url": "https://nubank.com.br",
+    "type": "http"
+  },
+  {
+    "id": "itau",
+    "name": "Itaú",
+    "category": "Bancos",
+    "url": "https://www.itau.com.br",
+    "type": "http"
+  }
+]
