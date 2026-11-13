@@ -22,94 +22,299 @@
           <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 pulse-green" id="global-dot"></span>
           <h1 class="text-2xl font-bold text-white tracking-tight">StatusWatch</h1>
         </div>
-        <p class="text-slate-400 text-sm mt-1">Monitoramento automatizado via GitHub Actions</p>
+        <p class="text-slate-400 text-sm mt-1">Monitoramento automatizado com tolerância a falhas</p>
       </div>
 
-      <div class="flex flex-wrap items-center gap-3">
+      <div class="flex flex-wrap items-center gap-2.5">
+        <button onclick="toggleSettingsPage()" id="settings-toggle-btn" class="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm font-medium border border-slate-700 transition">
+          ⚙️ Configurações
+        </button>
         <button onclick="enableNotifications()" id="notif-btn" class="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm font-medium border border-slate-700 transition">
           🔔 Ativar Notificações
         </button>
         <button onclick="testAlert()" class="px-3.5 py-2 rounded-lg bg-rose-950/60 hover:bg-rose-900/60 text-rose-300 text-sm font-medium border border-rose-800/60 transition">
           🔊 Testar Alarme
         </button>
-        <button onclick="loadStatus(true)" class="px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition">
-          ↻ Atualizar Agora
+        <button onclick="loadStatus()" class="px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition">
+          ↻ Atualizar
         </button>
       </div>
     </header>
 
-    <!-- Banner de Alerta -->
-    <div id="alert-banner" class="hidden mb-6 p-4 rounded-xl bg-rose-950/80 border border-rose-600 flex items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <span class="text-2xl">🚨</span>
+    <!-- PÁGINA DE CONFIGURAÇÕES (Oculta por padrão) -->
+    <div id="settings-page" class="hidden mb-8 bg-slate-900 border border-slate-700 rounded-2xl p-6 shadow-xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
         <div>
-          <h2 class="font-bold text-rose-200">Falha Detectada em Serviços Monitorados</h2>
-          <p id="alert-text" class="text-sm text-rose-300"></p>
+          <h2 class="text-xl font-bold text-white">⚙️ Configurações de Tempo e Tolerância de Alerta</h2>
+          <p class="text-sm text-slate-400 mt-0.5">Evite alarmes falsos por oscilações rápidas e controle a frequência das notificações.</p>
+        </div>
+        <button onclick="toggleSettingsPage()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700">
+          ✕ Voltar ao Painel
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Regra 1: Pings / Falhas Consecutivas -->
+        <div class="bg-slate-950/70 border border-slate-800 p-5 rounded-xl">
+          <label class="block text-sm font-bold text-white mb-1">
+            1. Falhas seguidas (Pings) para marcar como Fora do Ar
+          </label>
+          <p class="text-xs text-slate-400 mb-3">
+            O serviço só entra em estado crítico e dispara alarme após falhar essa quantidade de vezes consecutivas. Antes disso, fica apenas em observação.
+          </p>
+          <div class="flex items-center gap-3">
+            <input type="number" id="cfg-failures" min="1" max="20" value="5" class="w-24 px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white font-bold text-center focus:border-indigo-500 focus:outline-none" />
+            <span class="text-sm text-slate-300">checagens seguidas sem resposta</span>
+          </div>
+        </div>
+
+        <!-- Regra 2: Cooldown entre alertas -->
+        <div class="bg-slate-950/70 border border-slate-800 p-5 rounded-xl">
+          <label class="block text-sm font-bold text-white mb-1">
+            2. Intervalo mínimo entre alertas (Silenciamento / Cooldown)
+          </label>
+          <p class="text-xs text-slate-400 mb-3">
+            Tempo mínimo de espera antes de tocar o som ou enviar nova notificação para o mesmo serviço que já está fora do ar.
+          </p>
+          <div class="flex items-center gap-3">
+            <select id="cfg-cooldown" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white font-medium focus:border-indigo-500 focus:outline-none">
+              <option value="5">A cada 5 minutos</option>
+              <option value="15">A cada 15 minutos</option>
+              <option value="30" selected>A cada 30 minutos</option>
+              <option value="60">A cada 1 hora</option>
+              <option value="180">A cada 3 horas</option>
+              <option value="1440">Apenas 1 vez por dia (24h)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Regra 3: Latência -->
+        <div class="bg-slate-950/70 border border-slate-800 p-5 rounded-xl">
+          <label class="block text-sm font-bold text-white mb-1">
+            3. Limite de latência para considerar Instável (Lento)
+          </label>
+          <p class="text-xs text-slate-400 mb-3">
+            Se o site responder acima desse tempo (em milissegundos), será marcado como Instável (amarelo), sem disparar alarme crítico.
+          </p>
+          <div class="flex items-center gap-3">
+            <input type="number" id="cfg-latency" min="500" max="15000" step="500" value="4500" class="w-28 px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white font-bold text-center focus:border-indigo-500 focus:outline-none" />
+            <span class="text-sm text-slate-300">ms (milissegundos)</span>
+          </div>
+        </div>
+
+        <!-- Regra 4: Som e Notificações -->
+        <div class="bg-slate-950/70 border border-slate-800 p-5 rounded-xl flex flex-col justify-between">
+          <div>
+            <label class="block text-sm font-bold text-white mb-1">
+              4. Comportamento do Alarme no Navegador
+            </label>
+            <p class="text-xs text-slate-400 mb-3">
+              Escolha se deseja ouvir o bipe sonoro ou receber apenas o aviso visual silencioso.
+            </p>
+          </div>
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" id="cfg-sound" checked class="w-4 h-4 rounded accent-indigo-600" />
+            <span class="text-sm text-slate-200 font-medium">Ativar alerta sonoro (bipe) quando confirmar queda</span>
+          </label>
         </div>
       </div>
-      <button onclick="setStatusFilter('issues')" class="shrink-0 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold transition">
-        Ver Apenas Falhas
-      </button>
-    </div>
 
-    <!-- Barra de Status Geral (Botões de Filtro Rápido) -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <button id="card-filter-all" onclick="setStatusFilter('all')" class="text-left bg-slate-900/90 border-2 border-indigo-500 p-4 rounded-xl transition hover:bg-slate-800/80 focus:outline-none">
-        <div class="flex items-center justify-between">
-          <p class="text-xs text-slate-400 uppercase">Monitorados</p>
-          <span class="text-[11px] text-indigo-400 font-medium">Mostrar todos</span>
+      <!-- Ações e Exportação para config.json -->
+      <div class="mt-6 pt-5 border-t border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-3">
+          <button onclick="saveSettings()" class="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold transition">
+            💾 Salvar Configurações no Navegador
+          </button>
+          <button onclick="copyConfigJson()" class="px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-indigo-300 text-sm font-medium border border-slate-700 transition">
+            📋 Copiar JSON para config.json (GitHub)
+          </button>
         </div>
-        <p id="stat-total" class="text-2xl font-bold text-white mt-1">-</p>
-      </button>
+        <span id="save-feedback" class="text-xs text-emerald-400 font-medium hidden">✅ Configurações salvas e aplicadas!</span>
+      </div>
 
-      <button id="card-filter-up" onclick="setStatusFilter('operational')" class="text-left bg-slate-900/90 border border-slate-800 p-4 rounded-xl transition hover:border-emerald-700/70 hover:bg-slate-800/80 focus:outline-none">
-        <div class="flex items-center justify-between">
-          <p class="text-xs text-slate-400 uppercase">Operacionais</p>
-          <span class="text-[11px] text-slate-500">Filtrar</span>
-        </div>
-        <p id="stat-up" class="text-2xl font-bold text-emerald-400 mt-1">-</p>
-      </button>
-
-      <button id="card-filter-issues" onclick="setStatusFilter('issues')" class="text-left bg-slate-900/90 border border-slate-800 p-4 rounded-xl transition hover:border-rose-600/80 hover:bg-rose-950/20 focus:outline-none cursor-pointer">
-        <div class="flex items-center justify-between">
-          <p class="text-xs text-slate-400 uppercase">Instáveis / Fora</p>
-          <span id="issues-hint" class="text-[11px] text-rose-400/80 font-medium">Filtrar ▾</span>
-        </div>
-        <p id="stat-down" class="text-2xl font-bold text-rose-400 mt-1">-</p>
-      </button>
-
-      <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-xl">
-        <p class="text-xs text-slate-400 uppercase">Última Checagem</p>
-        <p id="stat-time" class="text-sm font-semibold text-slate-200 mt-2">Aguardando...</p>
+      <div id="json-preview-box" class="hidden mt-4 p-4 rounded-xl bg-slate-950 border border-slate-800">
+        <p class="text-xs text-slate-400 mb-2">Cole este conteúdo no arquivo <code class="text-indigo-400">config.json</code> do seu repositório GitHub para o robô seguir exatamente essa regra:</p>
+        <pre id="json-preview-code" class="text-xs text-emerald-300 overflow-x-auto"></pre>
       </div>
     </div>
 
-    <!-- Indicador de Filtro Ativo -->
-    <div id="active-filter-bar" class="hidden mb-6 px-4 py-2.5 rounded-lg bg-rose-950/40 border border-rose-800/60 flex items-center justify-between text-sm">
-      <span id="active-filter-label" class="text-rose-200 font-medium">Exibindo apenas serviços instáveis ou fora do ar</span>
-      <button onclick="setStatusFilter('all')" class="text-xs font-semibold text-white bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded-md border border-slate-700 transition">
-        ✕ Limpar Filtro
-      </button>
+    <!-- DASHBOARD PRINCIPAL -->
+    <div id="dashboard-view">
+      <!-- Banner de Alerta -->
+      <div id="alert-banner" class="hidden mb-6 p-4 rounded-xl bg-rose-950/80 border border-rose-600 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">🚨</span>
+          <div>
+            <h2 class="font-bold text-rose-200">Falha Confirmada em Serviços Monitorados</h2>
+            <p id="alert-text" class="text-sm text-rose-300"></p>
+          </div>
+        </div>
+        <button onclick="setStatusFilter('issues')" class="shrink-0 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold transition">
+          Ver Apenas Falhas
+        </button>
+      </div>
+
+      <!-- Barra de Status Geral (Botões de Filtro Rápido) -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <button id="card-filter-all" onclick="setStatusFilter('all')" class="text-left bg-slate-900/90 border-2 border-indigo-500 p-4 rounded-xl transition hover:bg-slate-800/80 focus:outline-none">
+          <div class="flex items-center justify-between">
+            <p class="text-xs text-slate-400 uppercase">Monitorados</p>
+            <span class="text-[11px] text-indigo-400 font-medium">Todos</span>
+          </div>
+          <p id="stat-total" class="text-2xl font-bold text-white mt-1">-</p>
+        </button>
+
+        <button id="card-filter-up" onclick="setStatusFilter('operational')" class="text-left bg-slate-900/90 border border-slate-800 p-4 rounded-xl transition hover:border-emerald-700/70 hover:bg-slate-800/80 focus:outline-none">
+          <div class="flex items-center justify-between">
+            <p class="text-xs text-slate-400 uppercase">Operacionais</p>
+            <span class="text-[11px] text-slate-500">Filtrar</span>
+          </div>
+          <p id="stat-up" class="text-2xl font-bold text-emerald-400 mt-1">-</p>
+        </button>
+
+        <button id="card-filter-issues" onclick="setStatusFilter('issues')" class="text-left bg-slate-900/90 border border-slate-800 p-4 rounded-xl transition hover:border-rose-600/80 hover:bg-rose-950/20 focus:outline-none cursor-pointer">
+          <div class="flex items-center justify-between">
+            <p class="text-xs text-slate-400 uppercase">Instáveis / Fora</p>
+            <span id="issues-hint" class="text-[11px] text-rose-400/80 font-medium">Filtrar ▾</span>
+          </div>
+          <p id="stat-down" class="text-2xl font-bold text-rose-400 mt-1">-</p>
+        </button>
+
+        <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-xl">
+          <p class="text-xs text-slate-400 uppercase">Regra Ativa</p>
+          <p id="stat-rule" class="text-xs font-semibold text-indigo-300 mt-1.5">5 pings • Cooldown 30m</p>
+          <p id="stat-time" class="text-[11px] text-slate-400 mt-1">Atualizado: -</p>
+        </div>
+      </div>
+
+      <!-- Indicador de Filtro Ativo -->
+      <div id="active-filter-bar" class="hidden mb-6 px-4 py-2.5 rounded-lg bg-rose-950/40 border border-rose-800/60 flex items-center justify-between text-sm">
+        <span id="active-filter-label" class="text-rose-200 font-medium">Exibindo apenas serviços instáveis ou fora do ar</span>
+        <button onclick="setStatusFilter('all')" class="text-xs font-semibold text-white bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded-md border border-slate-700 transition">
+          ✕ Limpar Filtro
+        </button>
+      </div>
+
+      <!-- Abas de Navegação por Categoria -->
+      <div id="category-tabs" class="flex flex-wrap items-center gap-2 border-b border-slate-800 pb-4 mb-8"></div>
+
+      <!-- Container Agrupado por Seções -->
+      <div id="sections-container" class="space-y-10"></div>
     </div>
-
-    <!-- Abas de Navegação por Categoria -->
-    <div id="category-tabs" class="flex flex-wrap items-center gap-2 border-b border-slate-800 pb-4 mb-8"></div>
-
-    <!-- Container Agrupado por Seções -->
-    <div id="sections-container" class="space-y-10"></div>
 
     <footer class="mt-12 pt-6 border-t border-slate-800/80 text-center text-xs text-slate-500">
-      Para adicionar ou remover serviços, edite o arquivo <code class="text-slate-300">services.json</code> no repositório.
+      Edite <code class="text-slate-300">services.json</code> para gerenciar sites e <code class="text-slate-300">config.json</code> para regras globais do robô.
     </footer>
   </div>
 
   <script>
-    let alertedIds = new Set();
+    const STORAGE_KEY = "statuswatch_user_config_v1";
+    const ALERT_HISTORY_KEY = "statuswatch_last_alert_timestamps";
+
     let currentTab = "Todos";
-    let statusFilter = "all"; // 'all' | 'operational' | 'issues'
+    let statusFilter = "all";
     let lastData = null;
 
+    function getUserConfig() {
+      const defaults = {
+        max_consecutive_failures: 5,
+        alert_cooldown_minutes: 30,
+        latency_threshold_ms: 4500,
+        sound_enabled: true
+      };
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        return { ...defaults, ...(saved || {}) };
+      } catch (e) {
+        return defaults;
+      }
+    }
+
+    function populateSettingsForm() {
+      const cfg = getUserConfig();
+      document.getElementById("cfg-failures").value = cfg.max_consecutive_failures;
+      document.getElementById("cfg-cooldown").value = cfg.alert_cooldown_minutes;
+      document.getElementById("cfg-latency").value = cfg.latency_threshold_ms;
+      document.getElementById("cfg-sound").checked = cfg.sound_enabled;
+      document.getElementById("stat-rule").textContent = `${cfg.max_consecutive_failures} pings • Cooldown ${cfg.alert_cooldown_minutes}m`;
+    }
+
+    function toggleSettingsPage() {
+      const page = document.getElementById("settings-page");
+      const dash = document.getElementById("dashboard-view");
+      const isHidden = page.classList.contains("hidden");
+      if (isHidden) {
+        populateSettingsForm();
+        page.classList.remove("hidden");
+        dash.classList.add("hidden");
+      } else {
+        page.classList.add("hidden");
+        dash.classList.remove("hidden");
+      }
+    }
+
+    function saveSettings() {
+      const cfg = {
+        max_consecutive_failures: Math.max(1, parseInt(document.getElementById("cfg-failures").value) || 5),
+        alert_cooldown_minutes: Math.max(1, parseInt(document.getElementById("cfg-cooldown").value) || 30),
+        latency_threshold_ms: Math.max(500, parseInt(document.getElementById("cfg-latency").value) || 4500),
+        sound_enabled: document.getElementById("cfg-sound").checked
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
+      populateSettingsForm();
+
+      const fb = document.getElementById("save-feedback");
+      fb.classList.remove("hidden");
+      setTimeout(() => fb.classList.add("hidden"), 3000);
+
+      if (lastData) renderDashboard(lastData);
+    }
+
+    function copyConfigJson() {
+      saveSettings();
+      const cfg = getUserConfig();
+      const repoConfig = {
+        max_consecutive_failures: cfg.max_consecutive_failures,
+        latency_threshold_ms: cfg.latency_threshold_ms,
+        alert_cooldown_minutes: cfg.alert_cooldown_minutes
+      };
+      const formatted = JSON.stringify(repoConfig, null, 2);
+      navigator.clipboard?.writeText(formatted);
+      document.getElementById("json-preview-code").textContent = formatted;
+      document.getElementById("json-preview-box").classList.remove("hidden");
+    }
+
+    function shouldTriggerAlert(serviceId, cooldownMinutes) {
+      try {
+        const history = JSON.parse(localStorage.getItem(ALERT_HISTORY_KEY) || "{}");
+        const lastTime = history[serviceId] || 0;
+        const now = Date.now();
+        const cooldownMs = cooldownMinutes * 60 * 1000;
+
+        if (now - lastTime >= cooldownMs) {
+          history[serviceId] = now;
+          localStorage.setItem(ALERT_HISTORY_KEY, JSON.stringify(history));
+          return true;
+        }
+        return false;
+      } catch (e) {
+        return true;
+      }
+    }
+
+    function clearAlertHistory(serviceId) {
+      try {
+        const history = JSON.parse(localStorage.getItem(ALERT_HISTORY_KEY) || "{}");
+        if (history[serviceId]) {
+          delete history[serviceId];
+          localStorage.setItem(ALERT_HISTORY_KEY, JSON.stringify(history));
+        }
+      } catch (e) {}
+    }
+
     function playBeep() {
+      const cfg = getUserConfig();
+      if (!cfg.sound_enabled) return;
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = ctx.createOscillator();
@@ -138,7 +343,7 @@
     function testAlert() {
       playBeep();
       if (Notification.permission === "granted") {
-        new Notification("StatusWatch - Teste", { body: "O sistema de alerta sonoro e visual está funcionando!" });
+        new Notification("StatusWatch - Teste", { body: "Alarme configurado com sucesso!" });
       }
     }
 
@@ -148,7 +353,6 @@
     }
 
     function setStatusFilter(filter) {
-      // Se clicar novamente no mesmo filtro ativo, volta para "all"
       statusFilter = (statusFilter === filter && filter !== "all") ? "all" : filter;
       if (lastData) renderDashboard(lastData);
     }
@@ -168,17 +372,35 @@
       }
     }
 
-    function renderCard(s) {
-      const isUp = s.status === "operational";
-      const isDeg = s.status === "degraded";
+    function computeEffectiveStatus(s, cfg) {
+      const streak = Number(s.fail_streak || 0);
+      // Se o backend marcou como down ou acumulou falhas, aplica a tolerância configurada pelo usuário
+      if (s.status === "down" || streak > 0) {
+        if (streak > 0 && streak < cfg.max_consecutive_failures) {
+          return "degraded"; // Ainda em período de tolerância (observação)
+        }
+        return "down";
+      }
+      if (s.latency > cfg.latency_threshold_ms || s.status === "degraded") {
+        return "degraded";
+      }
+      return "operational";
+    }
+
+    function renderCard(s, effectiveStatus, cfg) {
+      const isUp = effectiveStatus === "operational";
+      const isDeg = effectiveStatus === "degraded";
 
       const badge = isUp
         ? `<span class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">Operacional</span>`
         : isDeg
-        ? `<span class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-amber-950 text-amber-400 border border-amber-800">Instável</span>`
+        ? `<span class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-amber-950 text-amber-400 border border-amber-800">Observação / Lento</span>`
         : `<span class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-rose-950 text-rose-400 border border-rose-800">Fora do Ar</span>`;
 
       const border = isUp ? "border-slate-800" : isDeg ? "border-amber-700/70" : "border-rose-600";
+      const streakInfo = (s.fail_streak && s.fail_streak > 0)
+        ? `<span class="text-amber-400 font-semibold">Falhas: ${s.fail_streak}/${cfg.max_consecutive_failures}</span>`
+        : `<span>Latência: <strong class="text-slate-200">${s.latency} ms</strong></span>`;
 
       return `
         <div class="bg-slate-900/90 border ${border} rounded-xl p-4 flex flex-col justify-between transition hover:border-slate-600">
@@ -187,10 +409,10 @@
               <h3 class="text-base font-bold text-white">${s.name}</h3>
               ${badge}
             </div>
-            <p class="text-xs text-slate-400 mt-1.5 truncate">${s.detail || "OK"}</p>
+            <p class="text-xs text-slate-400 mt-1.5 truncate" title="${s.detail || 'OK'}">${s.detail || "OK"}</p>
           </div>
           <div class="mt-4 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
-            <span>Latência: <strong class="text-slate-200">${s.latency} ms</strong></span>
+            ${streakInfo}
             <a href="${s.url}" target="_blank" class="text-indigo-400 hover:underline">Abrir ↗</a>
           </div>
         </div>`;
@@ -221,30 +443,42 @@
     }
 
     function renderDashboard(data) {
-      const allServices = data.services || [];
-      let up = 0, downList = [];
+      const cfg = getUserConfig();
+      populateSettingsForm();
 
-      allServices.forEach(s => {
-        if (s.status === "operational") up++;
-        else downList.push(s);
+      const rawServices = data.services || [];
+      const enriched = rawServices.map(s => ({
+        ...s,
+        effectiveStatus: computeEffectiveStatus(s, cfg)
+      }));
+
+      let up = 0, issuesList = [], confirmedDownList = [];
+
+      enriched.forEach(s => {
+        if (s.effectiveStatus === "operational") {
+          up++;
+          clearAlertHistory(s.id);
+        } else {
+          issuesList.push(s);
+          if (s.effectiveStatus === "down") {
+            confirmedDownList.push(s);
+          }
+        }
       });
 
-      // Contadores globais (sempre mostram o total real)
-      document.getElementById("stat-total").textContent = allServices.length;
+      document.getElementById("stat-total").textContent = enriched.length;
       document.getElementById("stat-up").textContent = up;
-      document.getElementById("stat-down").textContent = downList.length;
-      document.getElementById("stat-time").textContent = data.updated_at || "-";
+      document.getElementById("stat-down").textContent = issuesList.length;
+      document.getElementById("stat-time").textContent = `Atualizado: ${data.updated_at || "-"}`;
 
       updateFilterCardsUI();
 
-      // Aplicar filtro de status selecionado
-      const filteredServices = allServices.filter(s => {
-        if (statusFilter === "operational") return s.status === "operational";
-        if (statusFilter === "issues") return s.status !== "operational";
+      const filteredServices = enriched.filter(s => {
+        if (statusFilter === "operational") return s.effectiveStatus === "operational";
+        if (statusFilter === "issues") return s.effectiveStatus !== "operational";
         return true;
       });
 
-      // Agrupar por categoria preservando ordem
       const grouped = {};
       filteredServices.forEach(s => {
         const cat = s.category || "Outros";
@@ -257,14 +491,13 @@
         currentTab = "Todos";
       }
 
-      // Renderizar Abas
       const tabsEl = document.getElementById("category-tabs");
       const allTabs = ["Todos", ...categories];
       tabsEl.innerHTML = allTabs.map(cat => {
         const count = cat === "Todos" ? filteredServices.length : grouped[cat].length;
         const hasIssue = cat === "Todos"
-          ? downList.length > 0
-          : grouped[cat].some(item => item.status !== "operational");
+          ? issuesList.length > 0
+          : grouped[cat].some(item => item.effectiveStatus !== "operational");
 
         const activeClass = currentTab === cat
           ? "bg-indigo-600 text-white border-indigo-500"
@@ -282,7 +515,6 @@
           </button>`;
       }).join("");
 
-      // Renderizar Seções
       const visibleCategories = currentTab === "Todos" ? categories : [currentTab];
       const sectionsEl = document.getElementById("sections-container");
 
@@ -298,7 +530,7 @@
       } else {
         sectionsEl.innerHTML = visibleCategories.map(cat => {
           const items = grouped[cat];
-          const catDown = items.filter(i => i.status !== "operational").length;
+          const catDown = items.filter(i => i.effectiveStatus !== "operational").length;
           const statusLabel = catDown === 0
             ? `<span class="text-xs text-emerald-400 font-medium">Tudo normal</span>`
             : `<span class="text-xs text-rose-400 font-medium">${catDown} alerta(s)</span>`;
@@ -311,37 +543,38 @@
                 ${statusLabel}
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                ${items.map(renderCard).join("")}
+                ${items.map(s => renderCard(s, s.effectiveStatus, cfg)).join("")}
               </div>
             </section>`;
         }).join("");
       }
 
-      // Banner de alerta global e som
+      // Alarme crítico APENAS para serviços que ultrapassaram o limite de falhas consecutivas E respeitando o Cooldown
       const banner = document.getElementById("alert-banner");
       const dot = document.getElementById("global-dot");
 
-      if (downList.length > 0) {
+      if (confirmedDownList.length > 0) {
         banner.classList.remove("hidden");
-        document.getElementById("alert-text").textContent = downList.map(d => `${d.name} (${d.detail})`).join(" • ");
+        document.getElementById("alert-text").textContent = confirmedDownList.map(d => `${d.name} (${d.detail})`).join(" • ");
         dot.className = "w-3.5 h-3.5 rounded-full bg-rose-500 pulse-red";
 
-        downList.forEach(d => {
-          if (!alertedIds.has(d.id)) {
-            alertedIds.add(d.id);
+        confirmedDownList.forEach(d => {
+          if (shouldTriggerAlert(d.id, cfg.alert_cooldown_minutes)) {
             playBeep();
             if (Notification.permission === "granted") {
-              new Notification(`🚨 ${d.name} apresentou falha!`, { body: d.detail });
+              new Notification(`🚨 ${d.name} está fora do ar!`, {
+                body: `Confirmado após ${d.fail_streak || cfg.max_consecutive_failures} tentativas. Próximo aviso em ${cfg.alert_cooldown_minutes} min.`
+              });
             }
           }
         });
       } else {
         banner.classList.add("hidden");
         dot.className = "w-3.5 h-3.5 rounded-full bg-emerald-500 pulse-green";
-        alertedIds.clear();
       }
     }
 
+    populateSettingsForm();
     loadStatus();
     setInterval(loadStatus, 60000);
   </script>
