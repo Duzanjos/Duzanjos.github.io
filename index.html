@@ -1,1 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StatusWatch | Monitoramento de Serviços</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #0b0f19; color: #e2e8f0; font-family: system-ui, -apple-system, sans-serif; }
+    .pulse-green { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); animation: pulseG 2s infinite; }
+    .pulse-red { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); animation: pulseR 1.5s infinite; }
+    @keyframes pulseG { 70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+    @keyframes pulseR { 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+  </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+  <div class="max-w-5xl mx-auto">
+    <!-- Cabeçalho -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-6 mb-6">
+      <div>
+        <div class="flex items-center gap-3">
+          <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 pulse-green" id="global-dot"></span>
+          <h1 class="text-2xl font-bold text-white tracking-tight">StatusWatch</h1>
+        </div>
+        <p class="text-slate-400 text-sm mt-1">Monitoramento automatizado via GitHub Actions</p>
+      </div>
 
+      <div class="flex flex-wrap items-center gap-3">
+        <button onclick="enableNotifications()" id="notif-btn" class="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm font-medium border border-slate-700 transition">
+          🔔 Ativar Notificações
+        </button>
+        <button onclick="testAlert()" class="px-3.5 py-2 rounded-lg bg-rose-950/60 hover:bg-rose-900/60 text-rose-300 text-sm font-medium border border-rose-800/60 transition">
+          🔊 Testar Alarme
+        </button>
+        <button onclick="loadStatus(true)" class="px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition">
+          ↻ Atualizar Agora
+        </button>
+      </div>
+    </header>
+
+    <!-- Banner de Alerta -->
+    <div id="alert-banner" class="hidden mb-6 p-4 rounded-xl bg-rose-950/80 border border-rose-600 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">🚨</span>
+        <div>
+          <h2 class="font-bold text-rose-200">Falha Detectada em Serviços Monitorados</h2>
+          <p id="alert-text" class="text-sm text-rose-300"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barra de Status Geral -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-xl">
+        <p class="text-xs text-slate-400 uppercase">Monitorados</p>
+        <p id="stat-total" class="text-2xl font-bold text-white mt-1">-</p>
+      </div>
+      <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-xl">
+        <p class="text-xs text-slate-400 uppercase">Operacionais</p>
+        <p id="stat-up" class="text-2xl font-bold text-emerald-400 mt-1">-</p>
+      </div>
+      <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-xl">
+        <p class="text-xs text-slate-400 uppercase">Instáveis / Fora</p>
+        <p id="stat-down" class="text-2xl font-bold text-rose-400 mt-1">-</p>
+      </div>
+      <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-xl">
+        <p class="text-xs text-slate-400 uppercase">Última Checagem</p>
+        <p id="stat-time" class="text-sm font-semibold text-slate-200 mt-2">Aguardando...</p>
+      </div>
+    </div>
+
+    <!-- Grid de Serviços -->
+    <div id="services-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+    <footer class="mt-10 pt-6 border-t border-slate-800/80 text-center text-xs text-slate-500">
+      Para adicionar ou remover serviços, edite o arquivo <code class="text-slate-300">services.json</code> no repositório.
+    </footer>
+  </div>
+
+  <script>
+    let alertedIds = new Set();
+
+    function playBeep() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(520, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.25);
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.5);
+      } catch (e) {}
+    }
+
+    function enableNotifications() {
+      if (!("Notification" in window)) return alert("Seu navegador não suporta notificações.");
+      Notification.requestPermission().then(p => {
+        if (p === "granted") {
+          document.getElementById("notif-btn").textContent = "✅ Notificações Ativas";
+        }
+      });
+    }
+
+    function testAlert() {
+      playBeep();
+      if (Notification.permission === "granted") {
+        new Notification("StatusWatch - Teste", { body: "O sistema de alerta sonoro e visual está funcionando!" });
+      }
+    }
+
+    async function loadStatus(manual = false) {
+      try {
+        // Evita cache do GitHub Pages adicionando timestamp
+        const res = await fetch(`./status.json?t=${Date.now()}`);
+        if (!res.ok) throw new Error("Arquivo status.json ainda não gerado.");
+        const data = await res.json();
+        renderDashboard(data);
+      } catch (err) {
+        document.getElementById("services-grid").innerHTML = `
+          <div class="col-span-full bg-slate-900 border border-amber-700/50 p-6 rounded-xl text-center">
+            <p class="text-amber-300 font-semibold">Aguardando primeira execução do GitHub Actions</p>
+            <p class="text-slate-400 text-sm mt-1">Vá na aba <b>Actions</b> do seu repositório no GitHub e execute o workflow <b>Monitorar Serviços</b> para gerar o primeiro status.</p>
+          </div>`;
+      }
+    }
+
+    function renderDashboard(data) {
+      const grid = document.getElementById("services-grid");
+      const services = data.services || [];
+      let up = 0, downList = [];
+
+      grid.innerHTML = services.map(s => {
+        const isUp = s.status === "operational";
+        const isDeg = s.status === "degraded";
+        if (isUp) up++;
+        else downList.push(s);
+
+        const badge = isUp
+          ? `<span class="px-2.5 py-1 text-xs font-medium rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">Operacional</span>`
+          : isDeg
+          ? `<span class="px-2.5 py-1 text-xs font-medium rounded-full bg-amber-950 text-amber-400 border border-amber-800">Instável</span>`
+          : `<span class="px-2.5 py-1 text-xs font-medium rounded-full bg-rose-950 text-rose-400 border border-rose-800">Fora do Ar</span>`;
+
+        const border = isUp ? "border-slate-800" : isDeg ? "border-amber-700/70" : "border-rose-600";
+
+        return `
+          <div class="bg-slate-900/90 border ${border} rounded-xl p-5 flex flex-col justify-between transition hover:border-slate-600">
+            <div>
+              <div class="flex items-start justify-between gap-2">
+                <span class="text-xs font-medium text-indigo-400 uppercase tracking-wider">${s.category}</span>
+                ${badge}
+              </div>
+              <h3 class="text-lg font-bold text-white mt-2">${s.name}</h3>
+              <p class="text-xs text-slate-400 mt-1 truncate">${s.detail || "OK"}</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+              <span>Latência: <strong class="text-slate-200">${s.latency} ms</strong></span>
+              <a href="${s.url}" target="_blank" class="text-indigo-400 hover:underline">Abrir ↗</a>
+            </div>
+          </div>`;
+      }).join("");
+
+      document.getElementById("stat-total").textContent = services.length;
+      document.getElementById("stat-up").textContent = up;
+      document.getElementById("stat-down").textContent = downList.length;
+      document.getElementById("stat-time").textContent = data.updated_at || "-";
+
+      const banner = document.getElementById("alert-banner");
+      const dot = document.getElementById("global-dot");
+
+      if (downList.length > 0) {
+        banner.classList.remove("hidden");
+        document.getElementById("alert-text").textContent = downList.map(d => `${d.name} (${d.detail})`).join(" • ");
+        dot.className = "w-3.5 h-3.5 rounded-full bg-rose-500 pulse-red";
+
+        downList.forEach(d => {
+          if (!alertedIds.has(d.id)) {
+            alertedIds.add(d.id);
+            playBeep();
+            if (Notification.permission === "granted") {
+              new Notification(`🚨 ${d.name} apresentou falha!`, { body: d.detail });
+            }
+          }
+        });
+      } else {
+        banner.classList.add("hidden");
+        dot.className = "w-3.5 h-3.5 rounded-full bg-emerald-500 pulse-green";
+        alertedIds.clear();
+      }
+    }
+
+    loadStatus();
+    setInterval(loadStatus, 60000); // Recarrega a cada 1 minuto
+  </script>
+</body>
+</html>
