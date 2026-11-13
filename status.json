@@ -1,0 +1,50 @@
+{
+  "updated_at": "13/11/2026 07:10:17",
+  "services": [
+    {
+      "id": "ms365",
+      "name": "Microsoft 365 / Outlook",
+      "category": "Produtividade",
+      "url": "https://outlook.office.com",
+      "status": "down",
+      "latency": 0,
+      "detail": "<urlopen error [Errno 101] Network is unreachable>"
+    },
+    {
+      "id": "github",
+      "name": "GitHub Status",
+      "category": "Infraestrutura",
+      "url": "https://www.githubstatus.com/api/v2/status.json",
+      "status": "operational",
+      "latency": 134,
+      "detail": "All Systems Operational"
+    },
+    {
+      "id": "cloudflare",
+      "name": "Cloudflare",
+      "category": "Rede / DNS",
+      "url": "https://www.cloudflarestatus.com/api/v2/status.json",
+      "status": "degraded",
+      "latency": 230,
+      "detail": "Partially Degraded Service"
+    },
+    {
+      "id": "nubank",
+      "name": "Nubank",
+      "category": "Bancos",
+      "url": "https://nubank.com.br",
+      "status": "operational",
+      "latency": 78,
+      "detail": "HTTP 200"
+    },
+    {
+      "id": "itau",
+      "name": "Itaú",
+      "category": "Bancos",
+      "url": "https://www.itau.com.br",
+      "status": "operational",
+      "latency": 182,
+      "detail": "Online (HTTP 403)"
+    }
+  ]
+}
