@@ -39,7 +39,7 @@
     </header>
 
     <!-- Banner de Alerta -->
-    <div id="alert-banner" class="hidden mb-6 p-4 rounded-xl bg-rose-950/80 border border-rose-600 flex items-center justify-between">
+    <div id="alert-banner" class="hidden mb-6 p-4 rounded-xl bg-rose-950/80 border border-rose-600 flex items-center justify-between gap-4">
       <div class="flex items-center gap-3">
         <span class="text-2xl">🚨</span>
         <div>
@@ -47,26 +47,49 @@
           <p id="alert-text" class="text-sm text-rose-300"></p>
         </div>
       </div>
+      <button onclick="setStatusFilter('issues')" class="shrink-0 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold transition">
+        Ver Apenas Falhas
+      </button>
     </div>
 
-    <!-- Barra de Status Geral -->
+    <!-- Barra de Status Geral (Botões de Filtro Rápido) -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-xl">
-        <p class="text-xs text-slate-400 uppercase">Monitorados</p>
+      <button id="card-filter-all" onclick="setStatusFilter('all')" class="text-left bg-slate-900/90 border-2 border-indigo-500 p-4 rounded-xl transition hover:bg-slate-800/80 focus:outline-none">
+        <div class="flex items-center justify-between">
+          <p class="text-xs text-slate-400 uppercase">Monitorados</p>
+          <span class="text-[11px] text-indigo-400 font-medium">Mostrar todos</span>
+        </div>
         <p id="stat-total" class="text-2xl font-bold text-white mt-1">-</p>
-      </div>
-      <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-xl">
-        <p class="text-xs text-slate-400 uppercase">Operacionais</p>
+      </button>
+
+      <button id="card-filter-up" onclick="setStatusFilter('operational')" class="text-left bg-slate-900/90 border border-slate-800 p-4 rounded-xl transition hover:border-emerald-700/70 hover:bg-slate-800/80 focus:outline-none">
+        <div class="flex items-center justify-between">
+          <p class="text-xs text-slate-400 uppercase">Operacionais</p>
+          <span class="text-[11px] text-slate-500">Filtrar</span>
+        </div>
         <p id="stat-up" class="text-2xl font-bold text-emerald-400 mt-1">-</p>
-      </div>
-      <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-xl">
-        <p class="text-xs text-slate-400 uppercase">Instáveis / Fora</p>
+      </button>
+
+      <button id="card-filter-issues" onclick="setStatusFilter('issues')" class="text-left bg-slate-900/90 border border-slate-800 p-4 rounded-xl transition hover:border-rose-600/80 hover:bg-rose-950/20 focus:outline-none cursor-pointer">
+        <div class="flex items-center justify-between">
+          <p class="text-xs text-slate-400 uppercase">Instáveis / Fora</p>
+          <span id="issues-hint" class="text-[11px] text-rose-400/80 font-medium">Filtrar ▾</span>
+        </div>
         <p id="stat-down" class="text-2xl font-bold text-rose-400 mt-1">-</p>
-      </div>
+      </button>
+
       <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-xl">
         <p class="text-xs text-slate-400 uppercase">Última Checagem</p>
         <p id="stat-time" class="text-sm font-semibold text-slate-200 mt-2">Aguardando...</p>
       </div>
+    </div>
+
+    <!-- Indicador de Filtro Ativo -->
+    <div id="active-filter-bar" class="hidden mb-6 px-4 py-2.5 rounded-lg bg-rose-950/40 border border-rose-800/60 flex items-center justify-between text-sm">
+      <span id="active-filter-label" class="text-rose-200 font-medium">Exibindo apenas serviços instáveis ou fora do ar</span>
+      <button onclick="setStatusFilter('all')" class="text-xs font-semibold text-white bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded-md border border-slate-700 transition">
+        ✕ Limpar Filtro
+      </button>
     </div>
 
     <!-- Abas de Navegação por Categoria -->
@@ -83,6 +106,7 @@
   <script>
     let alertedIds = new Set();
     let currentTab = "Todos";
+    let statusFilter = "all"; // 'all' | 'operational' | 'issues'
     let lastData = null;
 
     function playBeep() {
@@ -120,6 +144,12 @@
 
     function selectTab(category) {
       currentTab = category;
+      if (lastData) renderDashboard(lastData);
+    }
+
+    function setStatusFilter(filter) {
+      // Se clicar novamente no mesmo filtro ativo, volta para "all"
+      statusFilter = (statusFilter === filter && filter !== "all") ? "all" : filter;
       if (lastData) renderDashboard(lastData);
     }
 
@@ -166,24 +196,57 @@
         </div>`;
     }
 
+    function updateFilterCardsUI() {
+      const cAll = document.getElementById("card-filter-all");
+      const cUp = document.getElementById("card-filter-up");
+      const cIssues = document.getElementById("card-filter-issues");
+      const bar = document.getElementById("active-filter-bar");
+      const barLabel = document.getElementById("active-filter-label");
+      const issuesHint = document.getElementById("issues-hint");
+
+      cAll.className = `text-left bg-slate-900/90 p-4 rounded-xl transition hover:bg-slate-800/80 focus:outline-none ${statusFilter === 'all' ? 'border-2 border-indigo-500' : 'border border-slate-800'}`;
+      cUp.className = `text-left bg-slate-900/90 p-4 rounded-xl transition hover:bg-slate-800/80 focus:outline-none ${statusFilter === 'operational' ? 'border-2 border-emerald-500 bg-emerald-950/20' : 'border border-slate-800 hover:border-emerald-700/70'}`;
+      cIssues.className = `text-left bg-slate-900/90 p-4 rounded-xl transition hover:bg-rose-950/20 focus:outline-none cursor-pointer ${statusFilter === 'issues' ? 'border-2 border-rose-500 bg-rose-950/30' : 'border border-slate-800 hover:border-rose-600/80'}`;
+
+      issuesHint.textContent = statusFilter === "issues" ? "Ativo ✓" : "Filtrar ▾";
+
+      if (statusFilter === "all") {
+        bar.classList.add("hidden");
+      } else {
+        bar.classList.remove("hidden");
+        barLabel.textContent = statusFilter === "issues"
+          ? "🔍 Filtro ativo: exibindo apenas serviços Instáveis ou Fora do Ar"
+          : "🔍 Filtro ativo: exibindo apenas serviços Operacionais";
+      }
+    }
+
     function renderDashboard(data) {
-      const services = data.services || [];
+      const allServices = data.services || [];
       let up = 0, downList = [];
 
-      services.forEach(s => {
+      allServices.forEach(s => {
         if (s.status === "operational") up++;
         else downList.push(s);
       });
 
-      // Contadores globais
-      document.getElementById("stat-total").textContent = services.length;
+      // Contadores globais (sempre mostram o total real)
+      document.getElementById("stat-total").textContent = allServices.length;
       document.getElementById("stat-up").textContent = up;
       document.getElementById("stat-down").textContent = downList.length;
       document.getElementById("stat-time").textContent = data.updated_at || "-";
 
+      updateFilterCardsUI();
+
+      // Aplicar filtro de status selecionado
+      const filteredServices = allServices.filter(s => {
+        if (statusFilter === "operational") return s.status === "operational";
+        if (statusFilter === "issues") return s.status !== "operational";
+        return true;
+      });
+
       // Agrupar por categoria preservando ordem
       const grouped = {};
-      services.forEach(s => {
+      filteredServices.forEach(s => {
         const cat = s.category || "Outros";
         if (!grouped[cat]) grouped[cat] = [];
         grouped[cat].push(s);
@@ -198,7 +261,7 @@
       const tabsEl = document.getElementById("category-tabs");
       const allTabs = ["Todos", ...categories];
       tabsEl.innerHTML = allTabs.map(cat => {
-        const count = cat === "Todos" ? services.length : grouped[cat].length;
+        const count = cat === "Todos" ? filteredServices.length : grouped[cat].length;
         const hasIssue = cat === "Todos"
           ? downList.length > 0
           : grouped[cat].some(item => item.status !== "operational");
@@ -223,25 +286,36 @@
       const visibleCategories = currentTab === "Todos" ? categories : [currentTab];
       const sectionsEl = document.getElementById("sections-container");
 
-      sectionsEl.innerHTML = visibleCategories.map(cat => {
-        const items = grouped[cat];
-        const catDown = items.filter(i => i.status !== "operational").length;
-        const statusLabel = catDown === 0
-          ? `<span class="text-xs text-emerald-400 font-medium">Tudo normal</span>`
-          : `<span class="text-xs text-rose-400 font-medium">${catDown} alerta(s)</span>`;
+      if (filteredServices.length === 0) {
+        sectionsEl.innerHTML = `
+          <div class="bg-slate-900/90 border border-slate-800 p-8 rounded-xl text-center">
+            <p class="text-emerald-400 font-semibold text-base">Nenhum serviço nesta condição</p>
+            <p class="text-slate-400 text-sm mt-1">Todos os serviços monitorados estão operando normalmente.</p>
+            <button onclick="setStatusFilter('all')" class="mt-4 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-white border border-slate-700 transition">
+              Mostrar Todos os Serviços
+            </button>
+          </div>`;
+      } else {
+        sectionsEl.innerHTML = visibleCategories.map(cat => {
+          const items = grouped[cat];
+          const catDown = items.filter(i => i.status !== "operational").length;
+          const statusLabel = catDown === 0
+            ? `<span class="text-xs text-emerald-400 font-medium">Tudo normal</span>`
+            : `<span class="text-xs text-rose-400 font-medium">${catDown} alerta(s)</span>`;
 
-        return `
-          <section>
-            <div class="flex items-center gap-4 mb-4">
-              <h2 class="text-lg font-bold text-white tracking-wide">${cat}</h2>
-              <div class="h-px bg-slate-800 flex-1"></div>
-              ${statusLabel}
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              ${items.map(renderCard).join("")}
-            </div>
-          </section>`;
-      }).join("");
+          return `
+            <section>
+              <div class="flex items-center gap-4 mb-4">
+                <h2 class="text-lg font-bold text-white tracking-wide">${cat}</h2>
+                <div class="h-px bg-slate-800 flex-1"></div>
+                ${statusLabel}
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                ${items.map(renderCard).join("")}
+              </div>
+            </section>`;
+        }).join("");
+      }
 
       // Banner de alerta global e som
       const banner = document.getElementById("alert-banner");
