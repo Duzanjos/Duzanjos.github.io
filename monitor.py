@@ -13,10 +13,6 @@ USER_AGENT = (
 )
 
 def curl_probe(url, timeout=15):
-    """
-    Usa curl com HTTP/2 e TLS moderno para obter código HTTP e latência real,
-    evitando falsos positivos de WAF que bloqueiam a assinatura TLS do Python urllib.
-    """
     cmd = [
         "curl",
         "-s",
@@ -45,36 +41,60 @@ def curl_probe(url, timeout=15):
         return 0, 0, str(e)
 
 def evaluate_code(code, latency, stype):
-    # Códigos 2xx e 3xx indicam resposta ativa do servidor
     if 200 <= code < 400:
         status = "degraded" if latency > 4500 else "operational"
         return {"status": status, "latency": latency, "detail": f"Online (HTTP {code})"}
     
-    # Para bancos e governo, 401/403/405/429 significa que o servidor/WAF respondeu ativamente
     if stype == "bank" and code in (401, 403, 405, 429):
         return {"status": "operational", "latency": latency, "detail": f"Online (WAF HTTP {code})"}
     
-    # Para serviços web gerais, 401/403 também confirma servidor no ar (ex: login exigido)
     if code in (401, 403, 405):
         return {"status": "operational", "latency": latency, "detail": f"Online (HTTP {code})"}
 
-    # Erros 5xx (500, 502, 503, 504) são quedas reais do servidor
     if code >= 500:
         return {"status": "down", "latency": latency, "detail": f"Erro no Servidor (HTTP {code})"}
 
     return None
+
+def check_metastatus(url, keyword="whatsapp"):
+    import urllib.request
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    start = time.time()
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            latency = int((time.time() - start) * 1000)
+            data = json.loads(resp.read().decode("utf-8"))
+            issues = []
+            orgs = data if isinstance(data, list) else data.get("orgs", [])
+            for org in orgs:
+                for svc in org.get("services", []):
+                    name = svc.get("name", "")
+                    if keyword.lower() in name.lower():
+                        status_val = str(svc.get("status", "")).lower()
+                        if status_val not in ("", "ok", "operational", "no known issues", "none"):
+                            issues.append(f"{name}: {svc.get('status')}")
+            if issues:
+                return {"status": "down", "latency": latency, "detail": " | ".join(issues)[:65]}
+            return {"status": "operational", "latency": latency, "detail": "Online (Meta Status API)"}
+    except Exception:
+        return None
 
 def check_service(service):
     url = service["url"]
     fallback = service.get("fallback_url")
     stype = service.get("type", "http")
 
+    if stype == "metastatus":
+        keyword = service.get("meta_keyword", service["id"])
+        meta_res = check_metastatus(url, keyword)
+        if meta_res:
+            return meta_res
+
     code, latency, err = curl_probe(url)
     result = evaluate_code(code, latency, stype)
     if result:
         return result
 
-    # Se o endpoint principal falhou por bloqueio regional/timeout, tenta o fallback_url
     if fallback:
         fb_code, fb_latency, fb_err = curl_probe(fallback)
         fb_result = evaluate_code(fb_code, fb_latency, stype)
