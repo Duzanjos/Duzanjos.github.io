@@ -3,84 +3,87 @@
     "id": "caixa",
     "name": "Caixa Econômica",
     "category": "Bancos",
-    "url": "https://www.caixa.gov.br",
-    "type": "http"
+    "url": "https://internetbanking.caixa.gov.br",
+    "fallback_url": "https://www.caixa.gov.br",
+    "type": "bank"
   },
   {
     "id": "itau",
     "name": "Itaú",
     "category": "Bancos",
     "url": "https://www.itau.com.br",
-    "type": "http"
+    "type": "bank"
   },
   {
     "id": "bb",
     "name": "Banco do Brasil",
     "category": "Bancos",
-    "url": "https://www.bb.com.br",
-    "type": "http"
+    "url": "https://www2.bancobrasil.com.br",
+    "fallback_url": "https://www.bb.com.br",
+    "type": "bank"
   },
   {
     "id": "bradesco",
     "name": "Bradesco",
     "category": "Bancos",
     "url": "https://banco.bradesco",
-    "type": "http"
+    "type": "bank"
   },
   {
     "id": "santander",
     "name": "Santander",
     "category": "Bancos",
     "url": "https://www.santander.com.br",
-    "type": "http"
+    "type": "bank"
   },
   {
     "id": "nubank",
     "name": "Nubank",
     "category": "Bancos",
     "url": "https://nubank.com.br",
-    "type": "http"
+    "type": "bank"
   },
   {
     "id": "inter",
     "name": "Banco Inter",
     "category": "Bancos",
     "url": "https://inter.co",
-    "type": "http"
+    "type": "bank"
   },
   {
     "id": "sicoob",
     "name": "Sicoob",
     "category": "Bancos",
     "url": "https://www.sicoob.com.br",
-    "type": "http"
+    "type": "bank"
   },
   {
     "id": "sicredi",
     "name": "Sicredi",
     "category": "Bancos",
     "url": "https://www.sicredi.com.br",
-    "type": "http"
+    "type": "bank"
   },
   {
     "id": "pix",
     "name": "Pix (Banco Central)",
     "category": "Bancos",
-    "url": "https://www.bcb.gov.br/estabilidadefinanceira/pix",
-    "type": "http"
+    "url": "https://www.bcb.gov.br/api/servico/sitebcb/historicotaxasjuros",
+    "fallback_url": "https://www.bcb.gov.br",
+    "type": "bank"
   },
   {
     "id": "outlook",
     "name": "Outlook",
     "category": "Microsoft",
-    "url": "https://outlook.office.com",
+    "url": "https://outlook.office.com/owa/",
     "type": "http"
   },
   {
     "id": "office365",
     "name": "Office 365",
     "category": "Microsoft",
-    "url": "https://www.office.com",
+    "url": "https://portal.office.com",
     "type": "http"
   },
   {
@@ -108,14 +111,16 @@
     "id": "gov",
     "name": "Gov.br",
     "category": "Governo",
-    "url": "https://www.gov.br",
-    "type": "http"
+    "url": "https://sso.acesso.gov.br",
+    "fallback_url": "https://www.gov.br",
+    "type": "bank"
   },
   {
     "id": "whatsapp",
-    "name": "WhatsApp Web",
+    "name": "WhatsApp",
     "category": "Comunicação",
-    "url": "https://web.whatsapp.com",
+    "url": "https://static.whatsapp.net/rsrc.php/v3/yz/r/ujTY9i_Jhs1.png",
+    "fallback_url": "https://www.whatsapp.com",
     "type": "http"
   }
 ]
