@@ -14,7 +14,7 @@
   </style>
 </head>
 <body class="min-h-screen p-4 md:p-8">
-  <div class="max-w-5xl mx-auto">
+  <div class="max-w-6xl mx-auto">
     <!-- Cabeçalho -->
     <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-6 mb-6">
       <div>
@@ -50,7 +50,7 @@
     </div>
 
     <!-- Barra de Status Geral -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
       <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-xl">
         <p class="text-xs text-slate-400 uppercase">Monitorados</p>
         <p id="stat-total" class="text-2xl font-bold text-white mt-1">-</p>
@@ -69,16 +69,21 @@
       </div>
     </div>
 
-    <!-- Grid de Serviços -->
-    <div id="services-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    <!-- Abas de Navegação por Categoria -->
+    <div id="category-tabs" class="flex flex-wrap items-center gap-2 border-b border-slate-800 pb-4 mb-8"></div>
 
-    <footer class="mt-10 pt-6 border-t border-slate-800/80 text-center text-xs text-slate-500">
+    <!-- Container Agrupado por Seções -->
+    <div id="sections-container" class="space-y-10"></div>
+
+    <footer class="mt-12 pt-6 border-t border-slate-800/80 text-center text-xs text-slate-500">
       Para adicionar ou remover serviços, edite o arquivo <code class="text-slate-300">services.json</code> no repositório.
     </footer>
   </div>
 
   <script>
     let alertedIds = new Set();
+    let currentTab = "Todos";
+    let lastData = null;
 
     function playBeep() {
       try {
@@ -113,63 +118,132 @@
       }
     }
 
-    async function loadStatus(manual = false) {
+    function selectTab(category) {
+      currentTab = category;
+      if (lastData) renderDashboard(lastData);
+    }
+
+    async function loadStatus() {
       try {
-        // Evita cache do GitHub Pages adicionando timestamp
         const res = await fetch(`./status.json?t=${Date.now()}`);
         if (!res.ok) throw new Error("Arquivo status.json ainda não gerado.");
-        const data = await res.json();
-        renderDashboard(data);
+        lastData = await res.json();
+        renderDashboard(lastData);
       } catch (err) {
-        document.getElementById("services-grid").innerHTML = `
-          <div class="col-span-full bg-slate-900 border border-amber-700/50 p-6 rounded-xl text-center">
-            <p class="text-amber-300 font-semibold">Aguardando primeira execução do GitHub Actions</p>
-            <p class="text-slate-400 text-sm mt-1">Vá na aba <b>Actions</b> do seu repositório no GitHub e execute o workflow <b>Monitorar Serviços</b> para gerar o primeiro status.</p>
+        document.getElementById("sections-container").innerHTML = `
+          <div class="bg-slate-900 border border-amber-700/50 p-6 rounded-xl text-center">
+            <p class="text-amber-300 font-semibold">Aguardando execução do GitHub Actions</p>
+            <p class="text-slate-400 text-sm mt-1">Vá na aba <b>Actions</b> do repositório e execute o workflow <b>Monitorar Serviços</b>.</p>
           </div>`;
       }
     }
 
+    function renderCard(s) {
+      const isUp = s.status === "operational";
+      const isDeg = s.status === "degraded";
+
+      const badge = isUp
+        ? `<span class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">Operacional</span>`
+        : isDeg
+        ? `<span class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-amber-950 text-amber-400 border border-amber-800">Instável</span>`
+        : `<span class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-rose-950 text-rose-400 border border-rose-800">Fora do Ar</span>`;
+
+      const border = isUp ? "border-slate-800" : isDeg ? "border-amber-700/70" : "border-rose-600";
+
+      return `
+        <div class="bg-slate-900/90 border ${border} rounded-xl p-4 flex flex-col justify-between transition hover:border-slate-600">
+          <div>
+            <div class="flex items-start justify-between gap-2">
+              <h3 class="text-base font-bold text-white">${s.name}</h3>
+              ${badge}
+            </div>
+            <p class="text-xs text-slate-400 mt-1.5 truncate">${s.detail || "OK"}</p>
+          </div>
+          <div class="mt-4 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+            <span>Latência: <strong class="text-slate-200">${s.latency} ms</strong></span>
+            <a href="${s.url}" target="_blank" class="text-indigo-400 hover:underline">Abrir ↗</a>
+          </div>
+        </div>`;
+    }
+
     function renderDashboard(data) {
-      const grid = document.getElementById("services-grid");
       const services = data.services || [];
       let up = 0, downList = [];
 
-      grid.innerHTML = services.map(s => {
-        const isUp = s.status === "operational";
-        const isDeg = s.status === "degraded";
-        if (isUp) up++;
+      services.forEach(s => {
+        if (s.status === "operational") up++;
         else downList.push(s);
+      });
 
-        const badge = isUp
-          ? `<span class="px-2.5 py-1 text-xs font-medium rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">Operacional</span>`
-          : isDeg
-          ? `<span class="px-2.5 py-1 text-xs font-medium rounded-full bg-amber-950 text-amber-400 border border-amber-800">Instável</span>`
-          : `<span class="px-2.5 py-1 text-xs font-medium rounded-full bg-rose-950 text-rose-400 border border-rose-800">Fora do Ar</span>`;
-
-        const border = isUp ? "border-slate-800" : isDeg ? "border-amber-700/70" : "border-rose-600";
-
-        return `
-          <div class="bg-slate-900/90 border ${border} rounded-xl p-5 flex flex-col justify-between transition hover:border-slate-600">
-            <div>
-              <div class="flex items-start justify-between gap-2">
-                <span class="text-xs font-medium text-indigo-400 uppercase tracking-wider">${s.category}</span>
-                ${badge}
-              </div>
-              <h3 class="text-lg font-bold text-white mt-2">${s.name}</h3>
-              <p class="text-xs text-slate-400 mt-1 truncate">${s.detail || "OK"}</p>
-            </div>
-            <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
-              <span>Latência: <strong class="text-slate-200">${s.latency} ms</strong></span>
-              <a href="${s.url}" target="_blank" class="text-indigo-400 hover:underline">Abrir ↗</a>
-            </div>
-          </div>`;
-      }).join("");
-
+      // Contadores globais
       document.getElementById("stat-total").textContent = services.length;
       document.getElementById("stat-up").textContent = up;
       document.getElementById("stat-down").textContent = downList.length;
       document.getElementById("stat-time").textContent = data.updated_at || "-";
 
+      // Agrupar por categoria preservando ordem
+      const grouped = {};
+      services.forEach(s => {
+        const cat = s.category || "Outros";
+        if (!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(s);
+      });
+
+      const categories = Object.keys(grouped);
+      if (currentTab !== "Todos" && !categories.includes(currentTab)) {
+        currentTab = "Todos";
+      }
+
+      // Renderizar Abas
+      const tabsEl = document.getElementById("category-tabs");
+      const allTabs = ["Todos", ...categories];
+      tabsEl.innerHTML = allTabs.map(cat => {
+        const count = cat === "Todos" ? services.length : grouped[cat].length;
+        const hasIssue = cat === "Todos"
+          ? downList.length > 0
+          : grouped[cat].some(item => item.status !== "operational");
+
+        const activeClass = currentTab === cat
+          ? "bg-indigo-600 text-white border-indigo-500"
+          : "bg-slate-900 text-slate-300 border-slate-800 hover:bg-slate-800";
+
+        const dotAlert = hasIssue
+          ? `<span class="w-2 h-2 rounded-full bg-rose-500 inline-block"></span>`
+          : "";
+
+        return `
+          <button onclick="selectTab('${cat}')" class="px-4 py-2 rounded-lg text-sm font-medium border transition flex items-center gap-2 ${activeClass}">
+            ${dotAlert}
+            <span>${cat}</span>
+            <span class="text-xs opacity-75 bg-black/25 px-1.5 py-0.5 rounded">${count}</span>
+          </button>`;
+      }).join("");
+
+      // Renderizar Seções
+      const visibleCategories = currentTab === "Todos" ? categories : [currentTab];
+      const sectionsEl = document.getElementById("sections-container");
+
+      sectionsEl.innerHTML = visibleCategories.map(cat => {
+        const items = grouped[cat];
+        const catDown = items.filter(i => i.status !== "operational").length;
+        const statusLabel = catDown === 0
+          ? `<span class="text-xs text-emerald-400 font-medium">Tudo normal</span>`
+          : `<span class="text-xs text-rose-400 font-medium">${catDown} alerta(s)</span>`;
+
+        return `
+          <section>
+            <div class="flex items-center gap-4 mb-4">
+              <h2 class="text-lg font-bold text-white tracking-wide">${cat}</h2>
+              <div class="h-px bg-slate-800 flex-1"></div>
+              ${statusLabel}
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              ${items.map(renderCard).join("")}
+            </div>
+          </section>`;
+      }).join("");
+
+      // Banner de alerta global e som
       const banner = document.getElementById("alert-banner");
       const dot = document.getElementById("global-dot");
 
@@ -195,7 +269,7 @@
     }
 
     loadStatus();
-    setInterval(loadStatus, 60000); // Recarrega a cada 1 minuto
+    setInterval(loadStatus, 60000);
   </script>
 </body>
 </html>
