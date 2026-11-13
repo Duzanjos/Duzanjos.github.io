@@ -1,0 +1,5 @@
+{
+  "max_consecutive_failures": 5,
+  "latency_threshold_ms": 4500,
+  "alert_cooldown_minutes": 30
+}
