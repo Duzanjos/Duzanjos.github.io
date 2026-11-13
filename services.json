@@ -76,7 +76,8 @@
     "id": "outlook",
     "name": "Outlook",
     "category": "Microsoft",
-    "url": "https://outlook.office.com/owa/",
+    "url": "https://outlook.live.com/owa/",
+    "fallback_url": "https://outlook.office.com",
     "type": "http"
   },
   {
