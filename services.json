@@ -1,24 +1,38 @@
 [
   {
-    "id": "ms365",
-    "name": "Microsoft 365 / Outlook",
-    "category": "Produtividade",
-    "url": "https://outlook.office.com",
+    "id": "caixa",
+    "name": "Caixa Econômica",
+    "category": "Bancos",
+    "url": "https://www.caixa.gov.br",
     "type": "http"
   },
   {
-    "id": "github",
-    "name": "GitHub Status",
-    "category": "Infraestrutura",
-    "url": "https://www.githubstatus.com/api/v2/status.json",
-    "type": "statuspage"
+    "id": "itau",
+    "name": "Itaú",
+    "category": "Bancos",
+    "url": "https://www.itau.com.br",
+    "type": "http"
   },
   {
-    "id": "cloudflare",
-    "name": "Cloudflare",
-    "category": "Rede / DNS",
-    "url": "https://www.cloudflarestatus.com/api/v2/status.json",
-    "type": "statuspage"
+    "id": "bb",
+    "name": "Banco do Brasil",
+    "category": "Bancos",
+    "url": "https://www.bb.com.br",
+    "type": "http"
+  },
+  {
+    "id": "bradesco",
+    "name": "Bradesco",
+    "category": "Bancos",
+    "url": "https://banco.bradesco",
+    "type": "http"
+  },
+  {
+    "id": "santander",
+    "name": "Santander",
+    "category": "Bancos",
+    "url": "https://www.santander.com.br",
+    "type": "http"
   },
   {
     "id": "nubank",
@@ -28,10 +42,80 @@
     "type": "http"
   },
   {
-    "id": "itau",
-    "name": "Itaú",
+    "id": "inter",
+    "name": "Banco Inter",
     "category": "Bancos",
-    "url": "https://www.itau.com.br",
+    "url": "https://inter.co",
+    "type": "http"
+  },
+  {
+    "id": "sicoob",
+    "name": "Sicoob",
+    "category": "Bancos",
+    "url": "https://www.sicoob.com.br",
+    "type": "http"
+  },
+  {
+    "id": "sicredi",
+    "name": "Sicredi",
+    "category": "Bancos",
+    "url": "https://www.sicredi.com.br",
+    "type": "http"
+  },
+  {
+    "id": "pix",
+    "name": "Pix (Banco Central)",
+    "category": "Bancos",
+    "url": "https://www.bcb.gov.br/estabilidadefinanceira/pix",
+    "type": "http"
+  },
+  {
+    "id": "outlook",
+    "name": "Outlook",
+    "category": "Microsoft",
+    "url": "https://outlook.office.com",
+    "type": "http"
+  },
+  {
+    "id": "office365",
+    "name": "Office 365",
+    "category": "Microsoft",
+    "url": "https://www.office.com",
+    "type": "http"
+  },
+  {
+    "id": "teams",
+    "name": "Microsoft Teams",
+    "category": "Microsoft",
+    "url": "https://teams.microsoft.com",
+    "type": "http"
+  },
+  {
+    "id": "gmail",
+    "name": "Gmail",
+    "category": "Google",
+    "url": "https://mail.google.com",
+    "type": "http"
+  },
+  {
+    "id": "google",
+    "name": "Google",
+    "category": "Google",
+    "url": "https://www.google.com",
+    "type": "http"
+  },
+  {
+    "id": "gov",
+    "name": "Gov.br",
+    "category": "Governo",
+    "url": "https://www.gov.br",
+    "type": "http"
+  },
+  {
+    "id": "whatsapp",
+    "name": "WhatsApp Web",
+    "category": "Comunicação",
+    "url": "https://web.whatsapp.com",
     "type": "http"
   }
 ]
