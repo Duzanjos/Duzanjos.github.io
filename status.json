@@ -1,41 +1,14 @@
 {
-  "updated_at": "13/11/2026 07:10:17",
+  "updated_at": "13/11/2026 07:28:14",
   "services": [
     {
-      "id": "ms365",
-      "name": "Microsoft 365 / Outlook",
-      "category": "Produtividade",
-      "url": "https://outlook.office.com",
-      "status": "down",
-      "latency": 0,
-      "detail": "<urlopen error [Errno 101] Network is unreachable>"
-    },
-    {
-      "id": "github",
-      "name": "GitHub Status",
-      "category": "Infraestrutura",
-      "url": "https://www.githubstatus.com/api/v2/status.json",
-      "status": "operational",
-      "latency": 134,
-      "detail": "All Systems Operational"
-    },
-    {
-      "id": "cloudflare",
-      "name": "Cloudflare",
-      "category": "Rede / DNS",
-      "url": "https://www.cloudflarestatus.com/api/v2/status.json",
-      "status": "degraded",
-      "latency": 230,
-      "detail": "Partially Degraded Service"
-    },
-    {
-      "id": "nubank",
-      "name": "Nubank",
+      "id": "caixa",
+      "name": "Caixa Econômica",
       "category": "Bancos",
-      "url": "https://nubank.com.br",
-      "status": "operational",
-      "latency": 78,
-      "detail": "HTTP 200"
+      "url": "https://www.caixa.gov.br",
+      "status": "down",
+      "latency": 2844,
+      "detail": "Erro HTTP 302"
     },
     {
       "id": "itau",
@@ -43,8 +16,143 @@
       "category": "Bancos",
       "url": "https://www.itau.com.br",
       "status": "operational",
-      "latency": 182,
+      "latency": 295,
       "detail": "Online (HTTP 403)"
+    },
+    {
+      "id": "bb",
+      "name": "Banco do Brasil",
+      "category": "Bancos",
+      "url": "https://www.bb.com.br",
+      "status": "operational",
+      "latency": 1145,
+      "detail": "HTTP 200"
+    },
+    {
+      "id": "bradesco",
+      "name": "Bradesco",
+      "category": "Bancos",
+      "url": "https://banco.bradesco",
+      "status": "operational",
+      "latency": 381,
+      "detail": "HTTP 200"
+    },
+    {
+      "id": "santander",
+      "name": "Santander",
+      "category": "Bancos",
+      "url": "https://www.santander.com.br",
+      "status": "operational",
+      "latency": 89,
+      "detail": "Online (HTTP 403)"
+    },
+    {
+      "id": "nubank",
+      "name": "Nubank",
+      "category": "Bancos",
+      "url": "https://nubank.com.br",
+      "status": "operational",
+      "latency": 246,
+      "detail": "HTTP 200"
+    },
+    {
+      "id": "inter",
+      "name": "Banco Inter",
+      "category": "Bancos",
+      "url": "https://inter.co",
+      "status": "operational",
+      "latency": 247,
+      "detail": "HTTP 200"
+    },
+    {
+      "id": "sicoob",
+      "name": "Sicoob",
+      "category": "Bancos",
+      "url": "https://www.sicoob.com.br",
+      "status": "operational",
+      "latency": 1269,
+      "detail": "HTTP 200"
+    },
+    {
+      "id": "sicredi",
+      "name": "Sicredi",
+      "category": "Bancos",
+      "url": "https://www.sicredi.com.br",
+      "status": "operational",
+      "latency": 458,
+      "detail": "HTTP 200"
+    },
+    {
+      "id": "pix",
+      "name": "Pix (Banco Central)",
+      "category": "Bancos",
+      "url": "https://www.bcb.gov.br/estabilidadefinanceira/pix",
+      "status": "operational",
+      "latency": 166,
+      "detail": "HTTP 200"
+    },
+    {
+      "id": "outlook",
+      "name": "Outlook",
+      "category": "Microsoft",
+      "url": "https://outlook.office.com",
+      "status": "down",
+      "latency": 0,
+      "detail": "<urlopen error [Errno 104] Connection reset by peer>"
+    },
+    {
+      "id": "office365",
+      "name": "Office 365",
+      "category": "Microsoft",
+      "url": "https://www.office.com",
+      "status": "operational",
+      "latency": 93,
+      "detail": "HTTP 200"
+    },
+    {
+      "id": "teams",
+      "name": "Microsoft Teams",
+      "category": "Microsoft",
+      "url": "https://teams.microsoft.com",
+      "status": "operational",
+      "latency": 144,
+      "detail": "HTTP 200"
+    },
+    {
+      "id": "gmail",
+      "name": "Gmail",
+      "category": "Google",
+      "url": "https://mail.google.com",
+      "status": "operational",
+      "latency": 514,
+      "detail": "HTTP 200"
+    },
+    {
+      "id": "google",
+      "name": "Google",
+      "category": "Google",
+      "url": "https://www.google.com",
+      "status": "operational",
+      "latency": 150,
+      "detail": "HTTP 200"
+    },
+    {
+      "id": "gov",
+      "name": "Gov.br",
+      "category": "Governo",
+      "url": "https://www.gov.br",
+      "status": "operational",
+      "latency": 1159,
+      "detail": "HTTP 200"
+    },
+    {
+      "id": "whatsapp",
+      "name": "WhatsApp Web",
+      "category": "Comunicação",
+      "url": "https://web.whatsapp.com",
+      "status": "operational",
+      "latency": 130,
+      "detail": "HTTP 200"
     }
   ]
 }
