@@ -166,6 +166,13 @@
     "type": "http"
   },
   {
+    "id": "Unimed - Convenios",
+    "name": "Portal Unimed",
+    "category": "Saúde",
+    "url": "https://tasy.unimedmaringa.com.br/PlanodeSaude/login.action",
+    "type": "http"
+  },
+  {
     "id": "linkedin",
     "name": "LinkedIn",
     "category": "Redes Sociais",
