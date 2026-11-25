@@ -1,5 +1,5 @@
 {
-  "updated_at": "24/11/2026 23:20:51",
+  "updated_at": "25/11/2026 08:29:22",
   "config": {
     "max_consecutive_failures": 5,
     "latency_threshold_ms": 4500,
@@ -12,9 +12,9 @@
       "category": "Bancos",
       "url": "https://www.caixa.gov.br",
       "status": "operational",
-      "latency": 255,
+      "latency": 1017,
       "fail_streak": 0,
-      "detail": "Online (WAF HTTP 403)"
+      "detail": "Online (HTTP 200)"
     },
     {
       "id": "itau",
@@ -22,7 +22,7 @@
       "category": "Bancos",
       "url": "https://www.itau.com.br",
       "status": "operational",
-      "latency": 207,
+      "latency": 70,
       "fail_streak": 0,
       "detail": "Online (WAF HTTP 403)"
     },
@@ -32,9 +32,9 @@
       "category": "Bancos",
       "url": "https://www.bb.com.br",
       "status": "degraded",
-      "latency": 507,
-      "fail_streak": 1,
-      "detail": "Instável (1/5 tentativas) • Erro HTTP 503"
+      "latency": 692,
+      "fail_streak": 2,
+      "detail": "Instável (2/5 tentativas) • Erro HTTP 503"
     },
     {
       "id": "bradesco",
@@ -42,7 +42,7 @@
       "category": "Bancos",
       "url": "https://banco.bradesco",
       "status": "operational",
-      "latency": 182,
+      "latency": 304,
       "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
@@ -52,7 +52,7 @@
       "category": "Bancos",
       "url": "https://www.santander.com.br",
       "status": "operational",
-      "latency": 124,
+      "latency": 156,
       "fail_streak": 0,
       "detail": "Online (WAF HTTP 403)"
     },
@@ -62,7 +62,7 @@
       "category": "Bancos",
       "url": "https://nubank.com.br",
       "status": "operational",
-      "latency": 23,
+      "latency": 31,
       "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
@@ -72,7 +72,7 @@
       "category": "Bancos",
       "url": "https://inter.co",
       "status": "operational",
-      "latency": 223,
+      "latency": 321,
       "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
@@ -82,7 +82,7 @@
       "category": "Bancos",
       "url": "https://www.sicoob.com.br",
       "status": "operational",
-      "latency": 897,
+      "latency": 976,
       "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
@@ -92,7 +92,7 @@
       "category": "Bancos",
       "url": "https://www.sicredi.com.br",
       "status": "operational",
-      "latency": 253,
+      "latency": 229,
       "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
@@ -102,7 +102,7 @@
       "category": "Bancos",
       "url": "https://www.bcb.gov.br",
       "status": "operational",
-      "latency": 1180,
+      "latency": 1419,
       "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
@@ -112,7 +112,7 @@
       "category": "Microsoft",
       "url": "https://outlook.office.com",
       "status": "operational",
-      "latency": 124,
+      "latency": 92,
       "fail_streak": 0,
       "detail": "Online (HTTP 417)"
     },
@@ -122,7 +122,7 @@
       "category": "Microsoft",
       "url": "https://portal.office.com",
       "status": "operational",
-      "latency": 528,
+      "latency": 204,
       "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
@@ -132,7 +132,7 @@
       "category": "Microsoft",
       "url": "https://teams.microsoft.com",
       "status": "operational",
-      "latency": 102,
+      "latency": 109,
       "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
@@ -142,7 +142,7 @@
       "category": "Google",
       "url": "https://mail.google.com",
       "status": "operational",
-      "latency": 219,
+      "latency": 209,
       "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
@@ -152,7 +152,7 @@
       "category": "Google",
       "url": "https://www.google.com",
       "status": "operational",
-      "latency": 85,
+      "latency": 95,
       "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
@@ -161,10 +161,10 @@
       "name": "Gov.br",
       "category": "Governo",
       "url": "https://www.gov.br",
-      "status": "operational",
-      "latency": 1428,
-      "fail_streak": 0,
-      "detail": "Online (HTTP 200)"
+      "status": "degraded",
+      "latency": 10002,
+      "fail_streak": 1,
+      "detail": "Instável (1/5 tentativas) • Sem resposta (curl: (28) Connection timed out after 10002 millis)"
     },
     {
       "id": "whatsapp",
@@ -172,7 +172,7 @@
       "category": "Comunicação",
       "url": "https://web.whatsapp.com",
       "status": "operational",
-      "latency": 63,
+      "latency": 75,
       "fail_streak": 0,
       "detail": "Online (Meta Status API)"
     },
@@ -182,7 +182,7 @@
       "category": "Redes Sociais",
       "url": "https://www.instagram.com",
       "status": "operational",
-      "latency": 11,
+      "latency": 14,
       "fail_streak": 0,
       "detail": "Online (Meta Status API)"
     },
@@ -192,7 +192,7 @@
       "category": "Redes Sociais",
       "url": "https://www.facebook.com",
       "status": "operational",
-      "latency": 12,
+      "latency": 16,
       "fail_streak": 0,
       "detail": "Online (Meta Status API)"
     },
@@ -202,7 +202,7 @@
       "category": "Redes Sociais",
       "url": "https://x.com",
       "status": "operational",
-      "latency": 38,
+      "latency": 78,
       "fail_streak": 0,
       "detail": "Online (HTTP 401)"
     },
@@ -212,7 +212,7 @@
       "category": "Redes Sociais",
       "url": "https://www.tiktok.com",
       "status": "operational",
-      "latency": 969,
+      "latency": 441,
       "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
@@ -222,7 +222,7 @@
       "category": "Redes Sociais",
       "url": "https://www.youtube.com",
       "status": "operational",
-      "latency": 189,
+      "latency": 190,
       "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
@@ -232,7 +232,7 @@
       "category": "Saúde",
       "url": "https://tasy.unimedmaringa.com.br/PlanodeSaude/login.action",
       "status": "operational",
-      "latency": 1212,
+      "latency": 1006,
       "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     },
@@ -242,7 +242,7 @@
       "category": "Redes Sociais",
       "url": "https://www.linkedin.com",
       "status": "operational",
-      "latency": 110,
+      "latency": 176,
       "fail_streak": 0,
       "detail": "Online (HTTP 200)"
     }
